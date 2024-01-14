@@ -21,7 +21,7 @@ async function saveBoards() {
       },
     });
 
-    fs.writeFile('data/board-list.json', JSON.stringify(response.data), (err) => {
+    fs.writeFile('data/boards.json', JSON.stringify(response.data), (err) => {
       if (err) {
         console.error('Saving error', err);
       } else {

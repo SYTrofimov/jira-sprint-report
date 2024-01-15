@@ -5,7 +5,7 @@ import axios from 'axios';
 import fs from 'fs';
 
 /**
- * Saves all Jira board details to a JSON file.
+ * Saves a list of all Jira boards to a JSON file.
  */
 async function saveBoards() {
   try {

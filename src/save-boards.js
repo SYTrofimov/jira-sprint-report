@@ -1,4 +1,3 @@
-// @ts-check
 'use strict';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -10,7 +9,10 @@ import fs from 'fs';
  */
 async function saveBoards() {
   try {
-    const response = await axios.get(process.env.JIRA_SITE_URL + 'rest/agile/1.0/board', {
+    let startAt = 0;
+    let boards = [];
+
+    const headers = {
       auth: {
         username: process.env.JIRA_USERNAME ?? '',
         password: process.env.ATLASSIAN_API_TOKEN ?? '',
@@ -19,9 +21,32 @@ async function saveBoards() {
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },
-    });
+    };
 
-    fs.writeFile('data/boards.json', JSON.stringify(response.data), (err) => {
+    while (true) {
+      const response = await axios.get(
+        process.env.JIRA_SITE_URL + `rest/agile/1.0/board?startAt=${startAt}`,
+        headers,
+      );
+
+      const json = response.data;
+
+      const newBoards = json.values.map((board) => {
+        return {
+          id: board.id,
+          name: board.name,
+        };
+      });
+
+      boards = boards.concat(newBoards);
+
+      if (json.isLast) {
+        break;
+      }
+      startAt += json.maxResults;
+    }
+
+    fs.writeFile('data/boards.json', JSON.stringify(boards), (err) => {
       if (err) {
         console.error('Saving error', err);
       } else {
@@ -29,9 +54,7 @@ async function saveBoards() {
       }
     });
   } catch (error) {
-    console.error('code:', error.code);
-    console.error('data:', error.config.data);
-    console.error('response:', error.response.data);
+    console.error(error);
   }
 }
 

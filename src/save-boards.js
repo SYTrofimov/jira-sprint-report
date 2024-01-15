@@ -12,7 +12,7 @@ async function saveBoards() {
     let startAt = 0;
     let boards = [];
 
-    const headers = {
+    const config = {
       auth: {
         username: process.env.JIRA_USERNAME ?? '',
         password: process.env.ATLASSIAN_API_TOKEN ?? '',
@@ -26,9 +26,8 @@ async function saveBoards() {
     while (true) {
       const response = await axios.get(
         process.env.JIRA_SITE_URL + `rest/agile/1.0/board?startAt=${startAt}`,
-        headers,
+        config,
       );
-
       const json = response.data;
 
       const newBoards = json.values.map((board) => {
@@ -37,7 +36,6 @@ async function saveBoards() {
           name: board.name,
         };
       });
-
       boards = boards.concat(newBoards);
 
       if (json.isLast) {

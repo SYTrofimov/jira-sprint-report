@@ -4,10 +4,7 @@ dotenv.config();
 import axios from 'axios';
 import fs from 'fs';
 
-/**
- * Saves a list of all Jira boards to a JSON file.
- */
-async function saveBoards() {
+async function saveBoardList() {
   try {
     let startAt = 0;
     let boards = [];
@@ -56,4 +53,4 @@ async function saveBoards() {
   }
 }
 
-await saveBoards();
+await saveBoardList();

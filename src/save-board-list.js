@@ -1,56 +1,12 @@
 'use strict';
-import dotenv from 'dotenv';
-dotenv.config();
-import axios from 'axios';
 import fs from 'fs';
 
+import { jiraGetValues } from './utils.js';
+
 async function saveBoardList() {
-  try {
-    let startAt = 0;
-    let boards = [];
-
-    const config = {
-      auth: {
-        username: process.env.JIRA_USERNAME ?? '',
-        password: process.env.ATLASSIAN_API_TOKEN ?? '',
-      },
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    };
-
-    while (true) {
-      const response = await axios.get(
-        process.env.JIRA_SITE_URL + `rest/agile/1.0/board?startAt=${startAt}`,
-        config,
-      );
-      const json = response.data;
-
-      const newBoards = json.values.map((board) => {
-        return {
-          id: board.id,
-          name: board.name,
-        };
-      });
-      boards = boards.concat(newBoards);
-
-      if (json.isLast) {
-        break;
-      }
-      startAt += json.maxResults;
-    }
-
-    fs.writeFile('data/boards.json', JSON.stringify(boards), (err) => {
-      if (err) {
-        console.error('Saving error', err);
-      } else {
-        console.log('Saved!');
-      }
-    });
-  } catch (error) {
-    console.error(error);
-  }
+  const boards = await jiraGetValues(`rest/agile/1.0/board`);
+  fs.writeFileSync('data/boards.json', JSON.stringify(boards));
+  console.log('Saved board list');
 }
 
 await saveBoardList();

@@ -36,19 +36,22 @@ async function jiraGet(route) {
  * @returns {Promise<any>} Values array
  * @throws {Error} bubbling up from jiraGet()
  */
-async function jiraGetValues(route) {
+async function jiraGetItems(route, node = 'values') {
   let startAt = 0;
-  let values = [];
+  let items = [];
+
   while (true) {
     const response = await jiraGet(route + `?startAt=${startAt}`);
-    values = values.concat(response.values);
+    items = items.concat(response[node]);
 
-    if (response.isLast) {
+    if (response.isLast || response.isLast === undefined) {
       break;
     }
+
     startAt += response.maxResults;
   }
-  return values;
+
+  return items;
 }
 
-export { jiraGet, jiraGetValues };
+export { jiraGet, jiraGetItems };

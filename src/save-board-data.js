@@ -13,20 +13,22 @@ async function saveListedBoardData() {
 async function saveBoardData(board) {
   console.log(`Saving board ${board.id} - ${board.name}`);
 
+  const boardPath = `data/board-${board.id}`;
+
   // Create a new folder for the board
-  if (!fs.existsSync(`data/${board.id}`)) {
-    fs.mkdirSync(`data/${board.id}`);
+  if (!fs.existsSync(boardPath)) {
+    fs.mkdirSync(boardPath);
   }
 
   const sprints = await jiraGetValues(`rest/agile/1.0/board/${board.id}/sprint`);
-  fs.writeFileSync(`data/${board.id}/sprints.json`, JSON.stringify(sprints));
+  fs.writeFileSync(boardPath + '/sprints.json', JSON.stringify(sprints, null, 2));
   console.log(`Saved ${sprints.length} sprints`);
 
   // Get GreenHopper velocity report
   const velocity = await jiraGet(
     `rest/greenhopper/1.0/rapid/charts/velocity?rapidViewId=${board.id}`,
   );
-  console.log(velocity);
+  fs.writeFileSync(boardPath + '/velocity.json', JSON.stringify(velocity, null, 2));
 }
 
 await saveListedBoardData();

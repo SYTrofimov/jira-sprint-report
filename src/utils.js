@@ -37,11 +37,12 @@ async function jiraGet(route) {
  * @throws {Error} bubbling up from jiraGet()
  */
 async function jiraGetItems(route, node = 'values') {
+  const separator = route.includes('?') ? '&' : '?';
+
   let startAt = 0;
   let items = [];
-
   while (true) {
-    const response = await jiraGet(route + `?startAt=${startAt}`);
+    const response = await jiraGet(route + separator + `startAt=${startAt}`);
     items = items.concat(response[node]);
 
     if (response.isLast || response.isLast === undefined) {

@@ -42,7 +42,7 @@ async function saveSprintData(board, sprint) {
 
   // Get sprint issues
   const issues = await jiraGetItems(
-    `rest/agile/1.0/board/${board.id}/sprint/${sprint.id}/issue`,
+    `rest/agile/1.0/board/${board.id}/sprint/${sprint.id}/issue?expand=changelog`,
     'issues',
   );
   fs.writeFileSync(sprintPathPrefix + 'sprint-issues.json', JSON.stringify(issues, null, 2));

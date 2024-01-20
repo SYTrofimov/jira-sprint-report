@@ -3,7 +3,7 @@ import fs from 'fs';
 
 import { jiraGet, jiraGetItems } from './utils.js';
 
-async function saveListedBoardData() {
+async function saveListedBoardSprints() {
   const boards = JSON.parse(fs.readFileSync('data/boards.json', 'utf8'));
   for (const board of boards) {
     await saveBoardData(board);
@@ -55,4 +55,4 @@ async function saveSprintData(board, sprint) {
   fs.writeFileSync(sprintPathPrefix + 'sprintreport.json', JSON.stringify(report, null, 2));
 }
 
-await saveListedBoardData();
+await saveListedBoardSprints();

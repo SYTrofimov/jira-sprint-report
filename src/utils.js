@@ -2,7 +2,6 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import axios from 'axios';
-import fs from 'fs';
 
 const AXIOS_CONFIG = {
   auth: {

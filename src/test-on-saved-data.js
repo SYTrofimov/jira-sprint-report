@@ -1,14 +1,14 @@
 'use strict';
 import fs from 'fs';
 
-async function testVelocity() {
+async function testOnSavedData() {
   const boards = JSON.parse(fs.readFileSync('data/boards.json', 'utf8'));
   for (const board of boards) {
-    await testVelocityOnBoard(board);
+    await testOnSavedBoard(board);
   }
 }
 
-async function testVelocityOnBoard(board) {
+async function testOnSavedBoard(board) {
   console.log(`Testing velocity on board ${board.id} - ${board.name}`);
 
   const boardPath = `data/board-${board.id}`;
@@ -24,11 +24,11 @@ async function testVelocityOnBoard(board) {
   fs.writeFileSync(boardPath + '/velocity.json', JSON.stringify(velocity, null, 2));
 
   for (const sprint of sprints) {
-    await testVelocityOnSprint(board, sprint);
+    await testOnSavedSprint(board, sprint);
   }
 }
 
-async function testVelocityOnSprint(board, sprint) {
+async function testOnSavedSprint(board, sprint) {
   console.log(`Saving sprint ${sprint.id} - ${sprint.name}`);
 
   const sprintPathPrefix = `data/board-${board.id}/${sprint.id}-`;
@@ -48,4 +48,4 @@ async function testVelocityOnSprint(board, sprint) {
   fs.writeFileSync(sprintPathPrefix + 'sprintreport.json', JSON.stringify(report, null, 2));
 }
 
-await testVelocity();
+await testOnSavedData();

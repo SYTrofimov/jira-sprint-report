@@ -29,7 +29,7 @@ async function saveBoardData(board) {
     `rest/greenhopper/1.0/rapid/charts/velocity?rapidViewId=${board.id}`,
   );
   fs.writeFileSync(boardPath + '/velocity.json', JSON.stringify(velocity, null, 2));
-  console.log('Saved velocity report');
+  console.log('Saved GreenHopper velocity report');
 
   for (const sprint of sprints) {
     await saveSprintData(board, sprint);
@@ -50,11 +50,11 @@ async function saveSprintData(board, sprint) {
   console.log(`Saved ${issues.length} issues`);
 
   // Get GreenHopper sprint report
-  const report = await jiraGet(
+  const sprintReport = await jiraGet(
     `rest/greenhopper/1.0/rapid/charts/sprintreport?rapidViewId=${board.id}&sprintId=${sprint.id}`,
   );
-  fs.writeFileSync(sprintPathPrefix + 'sprintreport.json', JSON.stringify(report, null, 2));
-  console.log('Saved sprint report');
+  fs.writeFileSync(sprintPathPrefix + 'sprintreport.json', JSON.stringify(sprintReport, null, 2));
+  console.log('Saved GreenHopper sprint report');
 }
 
 await saveListedBoardSprints();

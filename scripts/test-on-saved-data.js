@@ -13,15 +13,8 @@ async function testOnSavedBoard(board) {
 
   const boardPath = `data/board-${board.id}`;
 
-  const sprints = await jiraGetItems(`rest/agile/1.0/board/${board.id}/sprint`);
-  fs.writeFileSync(boardPath + '/sprints.json', JSON.stringify(sprints, null, 2));
-  console.log(`Saved ${sprints.length} board sprints`);
-
-  // Get GreenHopper velocity report
-  const velocity = await jiraGet(
-    `rest/greenhopper/1.0/rapid/charts/velocity?rapidViewId=${board.id}`,
-  );
-  fs.writeFileSync(boardPath + '/velocity.json', JSON.stringify(velocity, null, 2));
+  const sprints = JSON.parse(fs.readFileSync(boardPath + '/sprints.json', 'utf8'));
+  console.log(`Loaded ${sprints.length} board sprints`);
 
   for (const sprint of sprints) {
     await testOnSavedSprint(board, sprint);
@@ -29,23 +22,65 @@ async function testOnSavedBoard(board) {
 }
 
 async function testOnSavedSprint(board, sprint) {
-  console.log(`Saving sprint ${sprint.id} - ${sprint.name}`);
+  if (sprint.state !== 'closed') {
+    return;
+  }
+
+  console.log(`Testing sprint ${sprint.id} - ${sprint.name}`);
 
   const sprintPathPrefix = `data/board-${board.id}/${sprint.id}-`;
 
   // Get sprint issues
-  const issues = await jiraGetItems(
-    `rest/agile/1.0/board/${board.id}/sprint/${sprint.id}/issue?expand=changelog`,
-    'issues',
-  );
-  fs.writeFileSync(sprintPathPrefix + 'sprint-issues.json', JSON.stringify(issues, null, 2));
-  console.log(`Saved ${issues.length} issues`);
+  const issues = JSON.parse(fs.readFileSync(sprintPathPrefix + 'sprint-issues.json', 'utf8'));
+  console.log(`Loaded ${issues.length} issues`);
 
   // Get GreenHopper sprint report
-  const report = await jiraGet(
-    `rest/greenhopper/1.0/rapid/charts/sprintreport?rapidViewId=${board.id}&sprintId=${sprint.id}`,
+  const sprintReport = JSON.parse(fs.readFileSync(sprintPathPrefix + 'sprintreport.json', 'utf8'));
+  console.log(`Loaded GreenHopper sprint report`);
+
+  // Testing issues
+
+  const issueStatuses = [];
+
+  issueStatuses.push(
+    ...sprintReport.contents.completedIssues.map((issue) => ({
+      issue: issue,
+      status: 'COMPLETED',
+    })),
   );
-  fs.writeFileSync(sprintPathPrefix + 'sprintreport.json', JSON.stringify(report, null, 2));
+
+  issueStatuses.push(
+    ...sprintReport.contents.issuesNotCompletedInCurrentSprint.map((issue) => ({
+      issue: issue,
+      status: 'NOT_COMPLETED',
+    })),
+  );
+
+  issueStatuses.push(
+    ...sprintReport.contents.puntedIssues.map((issue) => ({
+      issue: issue,
+      status: 'PUNTED',
+    })),
+  );
+
+  issueStatuses.push(
+    ...sprintReport.contents.issuesCompletedInAnotherSprint.map((issue) => ({
+      issue: issue,
+      status: 'COMPLETED_IN_ANOTHER_SPRINT',
+    })),
+  );
+
+  const issueKeysAddedDuringSprint = new Set();
+  for (const issue in sprintReport.contents.issueKeysAddedDuringSprint) {
+    issueKeysAddedDuringSprint.add(issue);
+  }
+  console.log('Issues added during sprint', issueKeysAddedDuringSprint);
+
+  sprintReport.contents.issueKeysAddedDuringSprint;
+
+  for (const { issue, status } of issueStatuses) {
+    console.log(`Testing issue ${issue.key} - ${status}`);
+  }
 }
 
 await testOnSavedData();

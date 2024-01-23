@@ -8,7 +8,7 @@ async function saveBoardList() {
     fs.mkdirSync('data');
   }
 
-  const boards = await jiraGetItems(`rest/agile/1.0/board`);
+  const boards = await jiraGetItems('rest/agile/1.0/board');
   fs.writeFileSync('data/boards.json', JSON.stringify(boards, null, 2));
   console.log('Saved board list');
 }

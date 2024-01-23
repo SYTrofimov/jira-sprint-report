@@ -1,7 +1,12 @@
 'use strict';
 import fs from 'fs';
 
+import { initCustomFields, issueStateAtTimes } from '../src/jira-sprint-report.js';
+
 async function testOnSavedData() {
+  const customFields = JSON.parse(fs.readFileSync('data/custom-fields.json', 'utf8'));
+  initCustomFields(customFields);
+
   const boards = JSON.parse(fs.readFileSync('data/boards.json', 'utf8'));
   for (const board of boards) {
     await testOnSavedBoard(board);

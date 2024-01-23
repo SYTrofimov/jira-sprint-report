@@ -1,6 +1,28 @@
 'use strict';
 // @ts-check
 
+let CUSTOM_FIELDS = {};
+
+/**
+ * Initialize custom fields
+ * @param {Object} customFields - Custom fields from Jira Get Custom Fields API in the following format:
+ * {
+ *   storyPoints: 'customfield_10002',
+ *   sprint: 'customfield_10003',
+ * }
+ * @throws {Error} if customFields does not have required fields
+ */
+function initCustomFields(customFields) {
+  if (!customFields.storyPoints) {
+    throw new Error('Missing storyPoints field in customFields');
+  }
+  if (!customFields.sprint) {
+    throw new Error('Missing sprint field in customFields');
+  }
+
+  CUSTOM_FIELDS = customFields;
+}
+
 /**
  * Calculate the state of an issue at given times
  * Note: Only Story Points and Status are currently supported
@@ -20,4 +42,4 @@ function issueStateAtTimes(issue, times) {
   return issueState;
 }
 
-export { issueStateAtTimes };
+export { initCustomFields, issueStateAtTimes };

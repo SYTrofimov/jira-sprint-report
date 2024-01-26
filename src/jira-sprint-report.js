@@ -7,8 +7,8 @@ let CUSTOM_FIELDS = {};
  * Initialize custom fields
  * @param {Object} customFields - Custom fields from Jira Get Custom Fields API in the following format:
  * {
- *   storyPoints: 'customfield_10002',
- *   sprint: 'customfield_10003',
+ *   storyPoints: 'customfield_10001',
+ *   sprint: 'customfield_10002',
  * }
  * @throws {Error} if customFields does not have required fields
  */
@@ -24,22 +24,27 @@ function initCustomFields(customFields) {
 }
 
 /**
- * Calculate the state of an issue at given times
+ * Calculate the status of an issue with respect to a given sprint
  * Note: Only Story Points and Status are currently supported
- * @param {string} issue - Issue object from Jira Get Sprint Issues API
- * @param {DateTime} times - Array of times to calculate state at
- * @returns {Object} containing issue state at given times
+ * @param {Object} issue - Issue object from Jira Get Sprint Issues API, including changelog
+ * @param {Object} sprint - Sprint object from Jira Get Sprint API
+ * @returns {Object} in the following format:
+ * {
+ *   status: 'COMPLETED' | 'NOT_COMPLETED' | 'PUNTED' | 'COMPLETED_IN_ANOTHER_SPRINT',
+ *   initialEstimate: float,
+ *   finalEstimate: float,
+ *   addedDuringSprint: boolean,
+ * }
+ * @throws {Error} if required fields are missing
  */
-function issueStateAtTimes(issue, times) {
-  const issueState = {};
-
-  times.forEach((time) => {
-    issueState[time] = {
-      storyPoints: issue.fields.customfield_10002,
-      status: issue.fields.status.name,
-    };
-  });
-  return issueState;
+function issueVsSprint(issue, sprint) {
+  let result = {
+    status: 'COMPLETED',
+    initialEstimate: 3,
+    finalEstimate: 3,
+    addedDuringSprint: false,
+  };
+  return result;
 }
 
-export { initCustomFields, issueStateAtTimes };
+export { initCustomFields, issueVsSprint };

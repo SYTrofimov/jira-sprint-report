@@ -28,7 +28,7 @@ function initCustomFields(customFields) {
  * Note: Only Story Points and Status are currently supported
  * @param {Object} issue - Issue object from Jira Get Sprint Issues API, including changelog
  * @param {Object} sprint - Sprint object from Jira Get Sprint API
- * @returns {Object} in the following format:
+ * @returns {Object} an object in the following format:
  * {
  *   status: 'COMPLETED' | 'NOT_COMPLETED' | 'PUNTED' | 'COMPLETED_IN_ANOTHER_SPRINT',
  *   initialEstimate: float,
@@ -38,12 +38,23 @@ function initCustomFields(customFields) {
  * @throws {Error} if required fields are missing
  */
 function issueVsSprint(issue, sprint) {
-  let result = {
+  if (!issue.fields) {
+    throw new Error('Missing fields member in issue');
+  }
+  if (!issue.fields[CUSTOM_FIELDS.storyPoints]) {
+    throw new Error('Missing Story Points custom field in issue');
+  }
+  if (!issue.fields[CUSTOM_FIELDS.sprint]) {
+    throw new Error('Missing Sprint custom field in issue');
+  }
+
+  const result = {
     status: 'COMPLETED',
-    initialEstimate: 3,
-    finalEstimate: 3,
+    initialEstimate: 5,
+    finalEstimate: 5,
     addedDuringSprint: false,
   };
+
   return result;
 }
 

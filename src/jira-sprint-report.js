@@ -38,22 +38,63 @@ function initCustomFields(customFields) {
  * @throws {Error} if required fields are missing
  */
 function issueVsSprint(issue, sprint) {
-  if (!issue.fields) {
-    throw new Error('Missing fields member in issue');
+  if (!issue.key) {
+    throw new Error('Missing the key property in issue');
   }
-  if (!issue.fields[CUSTOM_FIELDS.storyPoints]) {
-    throw new Error('Missing Story Points custom field in issue');
+  if (!issue.fields) {
+    throw new Error(`Missing the fields property in issue ${issue.key}`);
+  }
+  if (issue.fields[CUSTOM_FIELDS.storyPoints] === undefined) {
+    // null is allowed
+    throw new Error(`Missing the Story Points custom field in issue ${issue.key}`);
   }
   if (!issue.fields[CUSTOM_FIELDS.sprint]) {
-    throw new Error('Missing Sprint custom field in issue');
+    throw new Error(`Missing the Sprint custom field in issue ${issue.key}`);
+  }
+  if (!issue.changelog || !issue.changelog.histories) {
+    throw new Error(`Missing changelog.histories in issue ${issue.key}`);
   }
 
-  const result = {
-    status: 'COMPLETED',
-    initialEstimate: 5,
-    finalEstimate: 5,
-    addedDuringSprint: false,
-  };
+  if (!sprint.name) {
+    throw new Error('Missing the name property in sprint');
+  }
+  if (!sprint.id) {
+    throw new Error(`Missing the id property in sprint '${sprint.name}'`);
+  }
+
+  const startTime = new Date(sprint.startDate);
+  const completeTime = new Date(sprint.completeDate);
+
+  // now
+  let lastStoryPoints = issue.fields[CUSTOM_FIELDS.storyPoints];
+  let lastTime = new Date();
+
+  const result = {};
+  result.finalEstimate = result.initialEstimate = lastStoryPoints;
+
+  // iterate over changelog histories backward in time
+  for (let history of issue.changelog.histories) {
+    const historyTime = new Date(history.created);
+
+    // crossing the sprint start boundary
+    if (historyTime < startTime) {
+      result.initialEstimate = lastStoryPoints;
+      break;
+    }
+
+    // crossing the sprint complete boundary
+    if (lastTime > completeTime && historyTime <= completeTime) {
+      result.finalEstimate = lastStoryPoints;
+    }
+
+    for (let item of history.items) {
+      if (item.fieldId === CUSTOM_FIELDS.storyPoints) {
+        lastStoryPoints = parseFloat(item.fromString);
+      }
+    }
+
+    lastTime = historyTime;
+  }
 
   return result;
 }

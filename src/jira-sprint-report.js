@@ -70,7 +70,7 @@ function issueVsSprint(issue, sprint) {
   let lastTime = new Date();
 
   const result = {};
-  result.finalEstimate = result.initialEstimate = lastStoryPoints;
+  result.finalEstimate = lastStoryPoints;
 
   // iterate over changelog histories backward in time
   for (let history of issue.changelog.histories) {
@@ -78,23 +78,24 @@ function issueVsSprint(issue, sprint) {
 
     // crossing the sprint start boundary
     if (historyTime < startTime) {
-      result.initialEstimate = lastStoryPoints;
       break;
-    }
-
-    // crossing the sprint complete boundary
-    if (lastTime > completeTime && historyTime <= completeTime) {
-      result.finalEstimate = lastStoryPoints;
     }
 
     for (let item of history.items) {
       if (item.fieldId === CUSTOM_FIELDS.storyPoints) {
         lastStoryPoints = parseFloat(item.fromString);
+
+        // update finalEstimate, until we cross the sprint complete boundary
+        if (historyTime > completeTime) {
+          result.finalEstimate = lastStoryPoints;
+        }
       }
     }
 
     lastTime = historyTime;
   }
+
+  result.initialEstimate = lastStoryPoints;
 
   return result;
 }

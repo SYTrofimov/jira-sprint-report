@@ -52,8 +52,8 @@ test('Story Points null and unchanged', () => {
   };
 
   const result = issueVsSprint(issue, SPRINT);
-  expect(result.finalEstimate).toBeNull();
   expect(result.initialEstimate).toBeNull();
+  expect(result.finalEstimate).toBeNull();
 });
 
 test('Story Points unchanged', () => {
@@ -69,13 +69,13 @@ test('Story Points unchanged', () => {
   };
 
   let result = issueVsSprint(issue, SPRINT);
-  expect(result.finalEstimate).toBe(5);
   expect(result.initialEstimate).toBe(5);
+  expect(result.finalEstimate).toBe(5);
 
   issue.fields.customfield_10030 = 3;
   result = issueVsSprint(issue, SPRINT);
-  expect(result.finalEstimate).toBe(3);
   expect(result.initialEstimate).toBe(3);
+  expect(result.finalEstimate).toBe(3);
 });
 
 test('Story Points changed before sprint', () => {
@@ -102,8 +102,8 @@ test('Story Points changed before sprint', () => {
   };
 
   const result = issueVsSprint(issue, SPRINT);
-  expect(result.finalEstimate).toBe(5);
   expect(result.initialEstimate).toBe(5);
+  expect(result.finalEstimate).toBe(5);
 });
 
 test('Story Points changed during sprint', () => {
@@ -130,8 +130,8 @@ test('Story Points changed during sprint', () => {
   };
 
   const result = issueVsSprint(issue, SPRINT);
-  expect(result.finalEstimate).toBe(3);
-  expect(result.initialEstimate).toBe(5);
+  expect(result.initialEstimate).toBe(3);
+  expect(result.finalEstimate).toBe(5);
 });
 
 test('Story Points changed after sprint', () => {
@@ -158,6 +158,6 @@ test('Story Points changed after sprint', () => {
   };
 
   const result = issueVsSprint(issue, SPRINT);
-  expect(result.finalEstimate).toBe(3);
   expect(result.initialEstimate).toBe(3);
+  expect(result.finalEstimate).toBe(3);
 });

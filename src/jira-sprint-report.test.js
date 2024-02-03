@@ -26,30 +26,13 @@ test('Required issue fields missing', () => {
 });
 
 test('Required sprint fields missing', () => {
-  const issue = {
-    changelog: {
-      histories: [],
-    },
-    fields: {
-      customfield_10030: 5,
-      customfield_10020: [],
-    },
-  };
+  const issue = makeMinimalIssue();
 
   expect(() => issueVsSprint(issue, {})).toThrow('Missing');
 });
 
 test('Story Points null and unchanged', () => {
-  const issue = {
-    key: 'KEY-1',
-    changelog: {
-      histories: [],
-    },
-    fields: {
-      customfield_10030: null,
-      customfield_10020: [],
-    },
-  };
+  const issue = makeMinimalIssue();
 
   const result = issueVsSprint(issue, SPRINT);
   expect(result.initialEstimate).toBeNull();
@@ -57,16 +40,8 @@ test('Story Points null and unchanged', () => {
 });
 
 test('Story Points unchanged', () => {
-  const issue = {
-    key: 'KEY-1',
-    changelog: {
-      histories: [],
-    },
-    fields: {
-      customfield_10030: 5,
-      customfield_10020: [],
-    },
-  };
+  const issue = makeMinimalIssue();
+  issue.fields.customfield_10030 = 5;
 
   let result = issueVsSprint(issue, SPRINT);
   expect(result.initialEstimate).toBe(5);
@@ -79,27 +54,9 @@ test('Story Points unchanged', () => {
 });
 
 test('Story Points changed before sprint', () => {
-  const issue = {
-    key: 'KEY-1',
-    changelog: {
-      histories: [
-        {
-          created: '2023-12-28T15:36:42.765+0000',
-          items: [
-            {
-              fieldId: 'customfield_10030',
-              fromString: '3',
-              toString: '5',
-            },
-          ],
-        },
-      ],
-    },
-    fields: {
-      customfield_10030: 5,
-      customfield_10020: [],
-    },
-  };
+  const issue = makeMinimalIssue();
+  issue.fields.customfield_10030 = 5;
+  addStoryPointChange(issue, '3', '5', '2023-12-28T15:36:42.765+0000');
 
   const result = issueVsSprint(issue, SPRINT);
   expect(result.initialEstimate).toBe(5);
@@ -107,27 +64,9 @@ test('Story Points changed before sprint', () => {
 });
 
 test('Story Points changed during sprint', () => {
-  const issue = {
-    key: 'KEY-1',
-    changelog: {
-      histories: [
-        {
-          created: '2024-01-15T15:36:42.765+0000',
-          items: [
-            {
-              fieldId: 'customfield_10030',
-              fromString: '3',
-              toString: '5',
-            },
-          ],
-        },
-      ],
-    },
-    fields: {
-      customfield_10030: 5,
-      customfield_10020: [],
-    },
-  };
+  const issue = makeMinimalIssue();
+  issue.fields.customfield_10030 = 5;
+  addStoryPointChange(issue, '3', '5', '2024-01-15T15:36:42.765+0000');
 
   const result = issueVsSprint(issue, SPRINT);
   expect(result.initialEstimate).toBe(3);
@@ -135,29 +74,37 @@ test('Story Points changed during sprint', () => {
 });
 
 test('Story Points changed after sprint', () => {
-  const issue = {
-    key: 'KEY-1',
-    changelog: {
-      histories: [
-        {
-          created: '2024-01-27T15:36:42.765+0000',
-          items: [
-            {
-              fieldId: 'customfield_10030',
-              fromString: '3',
-              toString: '5',
-            },
-          ],
-        },
-      ],
-    },
-    fields: {
-      customfield_10030: 5,
-      customfield_10020: [],
-    },
-  };
+  const issue = makeMinimalIssue();
+  issue.fields.customfield_10030 = 5;
+  addStoryPointChange(issue, '3', '5', '2024-01-27T15:36:42.765+0000');
 
   const result = issueVsSprint(issue, SPRINT);
   expect(result.initialEstimate).toBe(3);
   expect(result.finalEstimate).toBe(3);
 });
+
+function makeMinimalIssue() {
+  return {
+    key: 'KEY-1',
+    changelog: {
+      histories: [],
+    },
+    fields: {
+      customfield_10030: null,
+      customfield_10020: [],
+    },
+  };
+}
+
+function addStoryPointChange(issue, from, to, at) {
+  issue.changelog.histories.push({
+    created: at,
+    items: [
+      {
+        fieldId: 'customfield_10030',
+        fromString: from,
+        toString: to,
+      },
+    ],
+  });
+}

@@ -33,6 +33,7 @@ test('Required sprint fields missing', () => {
 
 test('Story Points null and unchanged', () => {
   const issue = makeMinimalIssue();
+  issue.fields.customfield_10030 = null;
 
   const result = issueVsSprint(issue, SPRINT);
   expect(result.initialEstimate).toBeNull();
@@ -41,7 +42,6 @@ test('Story Points null and unchanged', () => {
 
 test('Story Points unchanged', () => {
   const issue = makeMinimalIssue();
-  issue.fields.customfield_10030 = 5;
 
   let result = issueVsSprint(issue, SPRINT);
   expect(result.initialEstimate).toBe(5);
@@ -55,7 +55,6 @@ test('Story Points unchanged', () => {
 
 test('Story Points changed before sprint', () => {
   const issue = makeMinimalIssue();
-  issue.fields.customfield_10030 = 5;
   addStoryPointChange(issue, '3', '5', '2023-12-28T15:36:42.765+0000');
 
   const result = issueVsSprint(issue, SPRINT);
@@ -65,7 +64,6 @@ test('Story Points changed before sprint', () => {
 
 test('Story Points changed during sprint', () => {
   const issue = makeMinimalIssue();
-  issue.fields.customfield_10030 = 5;
   addStoryPointChange(issue, '3', '5', '2024-01-15T15:36:42.765+0000');
 
   const result = issueVsSprint(issue, SPRINT);
@@ -75,7 +73,6 @@ test('Story Points changed during sprint', () => {
 
 test('Story Points changed from null during sprint', () => {
   const issue = makeMinimalIssue();
-  issue.fields.customfield_10030 = 5;
   addStoryPointChange(issue, null, '5', '2024-01-15T15:36:42.765+0000');
 
   const result = issueVsSprint(issue, SPRINT);
@@ -85,6 +82,7 @@ test('Story Points changed from null during sprint', () => {
 
 test('Story Points changed to null during sprint', () => {
   const issue = makeMinimalIssue();
+  issue.fields.customfield_10030 = null;
   addStoryPointChange(issue, '5', null, '2024-01-15T15:36:42.765+0000');
 
   const result = issueVsSprint(issue, SPRINT);
@@ -94,12 +92,29 @@ test('Story Points changed to null during sprint', () => {
 
 test('Story Points changed after sprint', () => {
   const issue = makeMinimalIssue();
-  issue.fields.customfield_10030 = 5;
   addStoryPointChange(issue, '3', '5', '2024-01-27T15:36:42.765+0000');
 
   const result = issueVsSprint(issue, SPRINT);
   expect(result.initialEstimate).toBe(3);
   expect(result.finalEstimate).toBe(3);
+});
+
+test('Story Points changed exactly on sprint startDate', () => {
+  const issue = makeMinimalIssue();
+  addStoryPointChange(issue, '3', '5', SPRINT.startDate);
+
+  const result = issueVsSprint(issue, SPRINT);
+  expect(result.initialEstimate).toBe(5);
+  expect(result.finalEstimate).toBe(5);
+});
+
+test('Story Points changed exactly on sprint completeDate', () => {
+  const issue = makeMinimalIssue();
+  addStoryPointChange(issue, '3', '5', SPRINT.completeDate);
+
+  const result = issueVsSprint(issue, SPRINT);
+  expect(result.initialEstimate).toBe(3);
+  expect(result.finalEstimate).toBe(5);
 });
 
 function makeMinimalIssue() {
@@ -109,7 +124,7 @@ function makeMinimalIssue() {
       histories: [],
     },
     fields: {
-      customfield_10030: null,
+      customfield_10030: 5,
       customfield_10020: [],
     },
   };

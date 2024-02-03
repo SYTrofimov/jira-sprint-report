@@ -77,7 +77,7 @@ function issueVsSprint(issue, sprint) {
     const historyTime = new Date(history.created);
 
     // crossing the sprint start boundary
-    if (historyTime < startTime) {
+    if (historyTime <= startTime) {
       break;
     }
 

@@ -6,8 +6,8 @@ import { initCustomFields, issueVsSprint } from './jira-sprint-report.js';
 
 beforeAll(() => {
   initCustomFields({
-    storyPoints: 'customfield_10030',
-    sprint: 'customfield_10020',
+    storyPoints: 'customfield_storyPoints',
+    sprint: 'customfield_sprint',
   });
 });
 
@@ -28,8 +28,8 @@ function makeMinimalIssue() {
       histories: [],
     },
     fields: {
-      customfield_10030: 5,
-      customfield_10020: [],
+      customfield_storyPoints: 5,
+      customfield_sprint: [],
     },
   };
 }
@@ -39,7 +39,7 @@ function addStoryPointChange(issue, from, to, at) {
     created: at,
     items: [
       {
-        fieldId: 'customfield_10030',
+        fieldId: 'customfield_storyPoints',
         fromString: from,
         toString: to,
       },
@@ -59,7 +59,7 @@ test('Required sprint fields missing', () => {
 
 test('Story Points null and unchanged', () => {
   const issue = makeMinimalIssue();
-  issue.fields.customfield_10030 = null;
+  issue.fields.customfield_storyPoints = null;
 
   const result = issueVsSprint(issue, SPRINT);
   expect(result.initialEstimate).toBeNull();
@@ -73,7 +73,7 @@ test('Story Points unchanged', () => {
   expect(result.initialEstimate).toBe(5);
   expect(result.finalEstimate).toBe(5);
 
-  issue.fields.customfield_10030 = 3;
+  issue.fields.customfield_storyPoints = 3;
   result = issueVsSprint(issue, SPRINT);
   expect(result.initialEstimate).toBe(3);
   expect(result.finalEstimate).toBe(3);
@@ -108,7 +108,7 @@ test('Story Points changed from null during sprint', () => {
 
 test('Story Points changed to null during sprint', () => {
   const issue = makeMinimalIssue();
-  issue.fields.customfield_10030 = null;
+  issue.fields.customfield_storyPoints = null;
   addStoryPointChange(issue, '5', null, '2024-01-15T15:36:42.765+0000');
 
   const result = issueVsSprint(issue, SPRINT);
@@ -142,3 +142,11 @@ test('Story Points changed exactly on sprint completeDate', () => {
   expect(result.initialEstimate).toBe(3);
   expect(result.finalEstimate).toBe(5);
 });
+
+// test('Issue completed in the sprint', () => {
+//   const issue = makeMinimalIssue();
+//   issue.fields.customfield_10020 = [SPRINT.id];
+
+//   const result = issueVsSprint(issue, SPRINT);
+//   expect(result.status).toBe('COMPLETED');
+// });

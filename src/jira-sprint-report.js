@@ -25,7 +25,7 @@ function initCustomFields(customFields) {
 
 /**
  * Calculate the status of an issue with respect to a given sprint.
- * Issue and sprint must be related.
+ * Sprint must be closed. Issue and sprint must be related.
  * Issue changelog is expected to be sorted by created date in descending order.
  * @param {Object} issue - Issue object from Jira Get Sprint Issues API, including changelog
  * @param {Object} sprint - Sprint object from Jira Get Sprint API
@@ -53,11 +53,16 @@ function issueVsSprint(issue, sprint) {
   const result = {};
   result.finalEstimate = lastStoryPoints;
 
-  result.status = 'COMPLETED';
+  result.status = issue.fields.status.name === 'Done' ? 'COMPLETED' : 'NOT_COMPLETED';
 
-  // iterate over changelog histories backward in time
   for (let history of issue.changelog.histories) {
     const historyTime = new Date(history.created);
+
+    if (historyTime > lastTime) {
+      // we will not catch the wrong order before sprint start, but that's okay,
+      // as we are testing the unit tests, not Jira API here
+      throw new Error('Changelog.histories in the wrong order');
+    }
 
     // crossing the sprint start boundary
     if (historyTime <= startTime) {

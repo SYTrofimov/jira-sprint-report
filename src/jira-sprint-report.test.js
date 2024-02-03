@@ -34,6 +34,9 @@ function makeMinimalIssue() {
     fields: {
       customfield_storyPoints: 5,
       customfield_sprint: [],
+      status: {
+        name: 'To Do',
+      },
     },
   };
 }
@@ -51,11 +54,47 @@ function addStoryPointChange(issue, from, to, at) {
   });
 }
 
+function addSprintChange(issue, from, to, at) {
+  issue.changelog.histories.push({
+    created: at,
+    items: [
+      {
+        fieldId: 'customfield_sprint',
+        from: from,
+        to: to,
+      },
+    ],
+  });
+}
+
+function addStatusChange(issue, from, to, at) {
+  issue.changelog.histories.push({
+    created: at,
+    items: [
+      {
+        fieldId: 'status',
+        from: from,
+        to: to,
+      },
+    ],
+  });
+}
+
 test('Changelog.histories missing in issue', () => {
   const issue = makeMinimalIssue();
   issue.changelog = undefined;
 
   expect(() => issueVsSprint(issue, SPRINT)).toThrow('Missing');
+});
+
+test('Changelog.histories in the wrong order', () => {
+  const issue = makeMinimalIssue();
+  // we will not catch the wrong order before sprint start, but that's okay,
+  // as we are testing the unit tests, not Jira API here
+  addStoryPointChange(issue, '3', '5', DURING_SPRINT);
+  addStoryPointChange(issue, '3', '5', AFTER_SPRINT);
+
+  expect(() => issueVsSprint(issue, SPRINT)).toThrow('wrong order');
 });
 
 test('Story Points null and unchanged', () => {
@@ -144,13 +183,42 @@ test('Story Points changed exactly on sprint completeDate', () => {
   expect(result.finalEstimate).toBe(5);
 });
 
+test('Issue never completed', () => {
+  const issue = makeMinimalIssue();
+  issue.fields.customfield_sprint.push(SPRINT);
+  issue.fields.status = {
+    name: 'To Do',
+  };
+  addSprintChange(issue, `${SPRINT.id}`, `${SPRINT.id + 1}`, DURING_SPRINT);
+  addSprintChange(issue, '', `${SPRINT.id}`, BEFORE_SPRINT);
+
+  const result = issueVsSprint(issue, SPRINT);
+  expect(result.status).toBe('NOT_COMPLETED');
+});
+
 test('Issue completed in the sprint', () => {
   const issue = makeMinimalIssue();
   issue.fields.customfield_sprint.push(SPRINT);
   issue.fields.status = {
     name: 'Done',
   };
+  addStatusChange(issue, 'To Do', 'Done', DURING_SPRINT);
+  addSprintChange(issue, '', SPRINT.id, BEFORE_SPRINT);
 
   const result = issueVsSprint(issue, SPRINT);
   expect(result.status).toBe('COMPLETED');
 });
+
+// test('Issue completed after sprint', () => {
+//   const issue = makeMinimalIssue();
+//   issue.fields.customfield_sprint.push(SPRINT);
+//   issue.fields.status = {
+//     name: 'Done',
+//   };
+//   addStatusChange(issue, 'To Do', 'Done', AFTER_SPRINT);
+//   addSprintChange(issue, `${SPRINT.id}`, `${SPRINT.id + 1}`, DURING_SPRINT);
+//   addSprintChange(issue, '', SPRINT.id, BEFORE_SPRINT);
+
+//   const result = issueVsSprint(issue, SPRINT);
+//   expect(result.status).toBe('NOT_COMPLETED');
+// });

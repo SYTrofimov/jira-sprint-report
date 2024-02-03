@@ -24,8 +24,9 @@ function initCustomFields(customFields) {
 }
 
 /**
- * Calculate the status of an issue with respect to a given sprint
- * Note: Only Story Points and Status are currently supported
+ * Calculate the status of an issue with respect to a given sprint.
+ * Issue and sprint must be related.
+ * Issue changelog is expected to be sorted by created date in descending order.
  * @param {Object} issue - Issue object from Jira Get Sprint Issues API, including changelog
  * @param {Object} sprint - Sprint object from Jira Get Sprint API
  * @returns {Object} an object in the following format:
@@ -38,27 +39,8 @@ function initCustomFields(customFields) {
  * @throws {Error} if required fields are missing
  */
 function issueVsSprint(issue, sprint) {
-  if (!issue.key) {
-    throw new Error('Missing the key property in issue');
-  }
-  if (!issue.fields) {
-    throw new Error(`Missing the fields property in issue ${issue.key}`);
-  }
-  if (issue.fields[CUSTOM_FIELDS.storyPoints] === undefined /* null is allowed */) {
-    throw new Error(`Missing the Story Points custom field in issue ${issue.key}`);
-  }
-  if (!issue.fields[CUSTOM_FIELDS.sprint]) {
-    throw new Error(`Missing the Sprint custom field in issue ${issue.key}`);
-  }
-  if (!issue.changelog || !issue.changelog.histories) {
-    throw new Error(`Missing changelog.histories in issue ${issue.key}`);
-  }
-
-  if (!sprint.name) {
-    throw new Error('Missing the name property in sprint');
-  }
-  if (!sprint.id) {
-    throw new Error(`Missing the id property in sprint '${sprint.name}'`);
+  if (!issue.changelog) {
+    throw new Error(`Missing changelog in issue ${issue.key}`);
   }
 
   const startTime = new Date(sprint.startDate);
@@ -71,7 +53,7 @@ function issueVsSprint(issue, sprint) {
   const result = {};
   result.finalEstimate = lastStoryPoints;
 
-  result.status = 'NOT_COMPLETED';
+  result.status = 'COMPLETED';
 
   // iterate over changelog histories backward in time
   for (let history of issue.changelog.histories) {

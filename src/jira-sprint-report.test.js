@@ -47,14 +47,11 @@ function addStoryPointChange(issue, from, to, at) {
   });
 }
 
-test('Required issue fields missing', () => {
-  expect(() => issueVsSprint({}, SPRINT)).toThrow('Missing');
-});
-
-test('Required sprint fields missing', () => {
+test('Changelog.histories missing in issue', () => {
   const issue = makeMinimalIssue();
+  issue.changelog = undefined;
 
-  expect(() => issueVsSprint(issue, {})).toThrow('Missing');
+  expect(() => issueVsSprint(issue, SPRINT)).toThrow('Missing');
 });
 
 test('Story Points null and unchanged', () => {
@@ -148,5 +145,5 @@ test('Issue completed in the sprint', () => {
   issue.fields.customfield_sprint.push(SPRINT);
 
   const result = issueVsSprint(issue, SPRINT);
-  expect(result.status).toBe('NOT_COMPLETED');
+  expect(result.status).toBe('COMPLETED');
 });

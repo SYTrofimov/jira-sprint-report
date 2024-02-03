@@ -21,6 +21,32 @@ const SPRINT = {
   createdDate: '2024-01-10T09:00:17.954Z',
 };
 
+function makeMinimalIssue() {
+  return {
+    key: 'KEY-1',
+    changelog: {
+      histories: [],
+    },
+    fields: {
+      customfield_10030: 5,
+      customfield_10020: [],
+    },
+  };
+}
+
+function addStoryPointChange(issue, from, to, at) {
+  issue.changelog.histories.push({
+    created: at,
+    items: [
+      {
+        fieldId: 'customfield_10030',
+        fromString: from,
+        toString: to,
+      },
+    ],
+  });
+}
+
 test('Required issue fields missing', () => {
   expect(() => issueVsSprint({}, SPRINT)).toThrow('Missing');
 });
@@ -116,29 +142,3 @@ test('Story Points changed exactly on sprint completeDate', () => {
   expect(result.initialEstimate).toBe(3);
   expect(result.finalEstimate).toBe(5);
 });
-
-function makeMinimalIssue() {
-  return {
-    key: 'KEY-1',
-    changelog: {
-      histories: [],
-    },
-    fields: {
-      customfield_10030: 5,
-      customfield_10020: [],
-    },
-  };
-}
-
-function addStoryPointChange(issue, from, to, at) {
-  issue.changelog.histories.push({
-    created: at,
-    items: [
-      {
-        fieldId: 'customfield_10030',
-        fromString: from,
-        toString: to,
-      },
-    ],
-  });
-}

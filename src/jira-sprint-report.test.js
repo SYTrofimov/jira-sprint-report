@@ -143,10 +143,10 @@ test('Story Points changed exactly on sprint completeDate', () => {
   expect(result.finalEstimate).toBe(5);
 });
 
-// test('Issue completed in the sprint', () => {
-//   const issue = makeMinimalIssue();
-//   issue.fields.customfield_10020 = [SPRINT.id];
+test('Issue completed in the sprint', () => {
+  const issue = makeMinimalIssue();
+  issue.fields.customfield_sprint.push(SPRINT);
 
-//   const result = issueVsSprint(issue, SPRINT);
-//   expect(result.status).toBe('COMPLETED');
-// });
+  const result = issueVsSprint(issue, SPRINT);
+  expect(result.status).toBe('NOT_COMPLETED');
+});

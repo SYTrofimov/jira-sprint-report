@@ -71,6 +71,8 @@ function issueVsSprint(issue, sprint) {
   const result = {};
   result.finalEstimate = lastStoryPoints;
 
+  result.status = 'NOT_COMPLETED';
+
   // iterate over changelog histories backward in time
   for (let history of issue.changelog.histories) {
     const historyTime = new Date(history.created);

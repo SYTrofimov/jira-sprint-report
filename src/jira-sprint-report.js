@@ -83,7 +83,7 @@ function issueVsSprint(issue, sprint) {
 
     for (let item of history.items) {
       if (item.fieldId === CUSTOM_FIELDS.storyPoints) {
-        lastStoryPoints = parseFloat(item.fromString);
+        lastStoryPoints = item.fromString === null ? null : parseFloat(item.fromString);
 
         // update finalEstimate, until we cross the sprint complete boundary
         if (historyTime > completeTime) {

@@ -73,6 +73,25 @@ test('Story Points changed during sprint', () => {
   expect(result.finalEstimate).toBe(5);
 });
 
+test('Story Points changed from null during sprint', () => {
+  const issue = makeMinimalIssue();
+  issue.fields.customfield_10030 = 5;
+  addStoryPointChange(issue, null, '5', '2024-01-15T15:36:42.765+0000');
+
+  const result = issueVsSprint(issue, SPRINT);
+  expect(result.initialEstimate).toBeNull();
+  expect(result.finalEstimate).toBe(5);
+});
+
+test('Story Points changed to null during sprint', () => {
+  const issue = makeMinimalIssue();
+  addStoryPointChange(issue, '5', null, '2024-01-15T15:36:42.765+0000');
+
+  const result = issueVsSprint(issue, SPRINT);
+  expect(result.initialEstimate).toBe(5);
+  expect(result.finalEstimate).toBeNull();
+});
+
 test('Story Points changed after sprint', () => {
   const issue = makeMinimalIssue();
   issue.fields.customfield_10030 = 5;

@@ -54,12 +54,12 @@ function addStoryPointChange(issue, from, to, at) {
   });
 }
 
-function addSprintChange(issue, from, to, at) {
+function addChange(issue, from, to, at, fieldId) {
   issue.changelog.histories.push({
     created: at,
     items: [
       {
-        fieldId: 'customfield_sprint',
+        fieldId: fieldId,
         from: from,
         to: to,
       },
@@ -67,17 +67,12 @@ function addSprintChange(issue, from, to, at) {
   });
 }
 
+function addSprintChange(issue, from, to, at) {
+  addChange(issue, from, to, at, 'customfield_sprint');
+}
+
 function addStatusChange(issue, from, to, at) {
-  issue.changelog.histories.push({
-    created: at,
-    items: [
-      {
-        fieldId: 'status',
-        from: from,
-        to: to,
-      },
-    ],
-  });
+  addChange(issue, from, to, at, 'status');
 }
 
 test('Changelog.histories missing in issue', () => {

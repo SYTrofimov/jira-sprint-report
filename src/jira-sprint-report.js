@@ -44,8 +44,7 @@ function issueVsSprint(issue, sprint) {
   if (!issue.fields) {
     throw new Error(`Missing the fields property in issue ${issue.key}`);
   }
-  if (issue.fields[CUSTOM_FIELDS.storyPoints] === undefined) {
-    // null is allowed
+  if (issue.fields[CUSTOM_FIELDS.storyPoints] === undefined /* null is allowed */) {
     throw new Error(`Missing the Story Points custom field in issue ${issue.key}`);
   }
   if (!issue.fields[CUSTOM_FIELDS.sprint]) {

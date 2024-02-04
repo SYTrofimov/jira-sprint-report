@@ -29,7 +29,7 @@ const AFTER_SPRINT = '2024-01-27T15:36:42.765+0000';
 
 const SPRINT2 = {
   id: 6,
-  state: 'closed',
+  state: 'future',
   name: 'AC Sprint 2',
 };
 
@@ -229,19 +229,19 @@ test('Issue completed in the sprint, was there from the start', () => {
   expect(result.addedDuringSprint).toBe(false);
 });
 
-// test('Issue completed in the sprint, added during sprint', () => {
-//   const issue = makeMinimalIssue();
-//   issue.fields.customfield_sprint.push(SPRINT1);
-//   issue.fields.status = {
-//     name: 'Done',
-//   };
-//   addSprintChange(issue, '', SPRINT1.id, DURING_SPRINT1);
-//   addStatusChange(issue, 'To Do', 'Done', DURING_SPRINT2);
+test('Issue completed in the sprint, added during sprint', () => {
+  const issue = makeMinimalIssue();
+  issue.fields.customfield_sprint.push(SPRINT1);
+  issue.fields.status = {
+    name: 'Done',
+  };
+  addSprintChange(issue, '', SPRINT1.id, DURING_SPRINT1);
+  addStatusChange(issue, 'To Do', 'Done', DURING_SPRINT2);
 
-//   const result = issueVsSprint(issue, SPRINT1);
-//   expect(result.outcome).toBe('COMPLETED');
-//   expect(result.addedDuringSprint).toBe(true);
-// });
+  const result = issueVsSprint(issue, SPRINT1);
+  expect(result.outcome).toBe('COMPLETED');
+  expect(result.addedDuringSprint).toBe(true);
+});
 
 test('Issue completed after spring', () => {
   const issue = makeMinimalIssue();

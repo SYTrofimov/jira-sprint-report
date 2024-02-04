@@ -23,22 +23,21 @@ function initCustomFields(customFields) {
   CUSTOM_FIELDS = customFields;
 }
 
-/**
- * Convert a sprint field object to a JSON string of sprint IDs
- * @param {Object} sprint - Sprint field object from Jira Get Sprint Issues API
- * @returns {string} JSON string of sprint IDs
- */
-function sprintFieldToJSONString(sprint) {
-  return JSON.stringify(sprint.map((s) => parseInt(s.id)));
+function lastSprintIdFromSprintField(sprintField) {
+  if (sprintField.length === 0) {
+    return null;
+  }
+
+  return sprintField[sprintField.length - 1].id;
 }
 
-/**
- * Convert a comma/space-separated string of sprint IDs to a JSON string
- * @param {Object} sprint - Sprint field object from Jira Get Sprint Issues API
- * @returns {string} a comma/space of sprint IDs
- */
-function sprintStringToJSONString(sprint) {
-  return JSON.stringify(sprint.split(/, |,/).map((s) => parseInt(s)));
+function lastSprintIdFromSprintString(sprintString) {
+  if (!sprintString) {
+    return null;
+  }
+
+  const chunks = sprintString.split(/, |,/);
+  return parseInt(chunks[chunks.length - 1]);
 }
 
 /**
@@ -65,10 +64,10 @@ function issueVsSprint(issue, sprint) {
   const completeTime = new Date(sprint.completeDate);
 
   let storyPoints = issue.fields[CUSTOM_FIELDS.storyPoints];
-  let sprints = sprintFieldToJSONString(issue.fields[CUSTOM_FIELDS.sprint]);
+  let lastSprintId = lastSprintIdFromSprintField(issue.fields[CUSTOM_FIELDS.sprint]);
 
   let finalStoryPoints = storyPoints;
-  let finalSprints = sprints;
+  let finalLastSprintId = lastSprintId;
   let finalStatus = issue.fields.status.name;
 
   for (let history of issue.changelog.histories) {
@@ -86,10 +85,10 @@ function issueVsSprint(issue, sprint) {
           finalStoryPoints = storyPoints;
         }
       } else if (item.fieldId === CUSTOM_FIELDS.sprint) {
-        sprints = sprintStringToJSONString(item.from);
+        lastSprintId = lastSprintIdFromSprintString(item.from);
 
         if (historyTime > completeTime) {
-          finalSprints = sprints;
+          finalLastSprintId = lastSprintId;
         }
       } else if (item.fieldId === 'status') {
         if (historyTime > completeTime) {
@@ -100,9 +99,9 @@ function issueVsSprint(issue, sprint) {
   }
 
   let outcome = 'NOT_COMPLETED';
-  if (finalStatus === 'Done' && sprints === finalSprints) {
+  if (finalStatus === 'Done' && finalLastSprintId === sprint.id) {
     outcome = 'COMPLETED';
-  } else if (sprints !== finalSprints) {
+  } else if (lastSprintId !== finalLastSprintId) {
     outcome = 'PUNTED';
   }
 
@@ -110,7 +109,7 @@ function issueVsSprint(issue, sprint) {
     outcome: outcome,
     initialEstimate: storyPoints,
     finalEstimate: finalStoryPoints,
-    addedDuringSprint: false,
+    addedDuringSprint: lastSprintId !== sprint.id,
   };
 
   return result;

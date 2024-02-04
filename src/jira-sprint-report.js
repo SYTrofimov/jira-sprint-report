@@ -66,11 +66,10 @@ function issueVsSprint(issue, sprint) {
 
   let storyPoints = issue.fields[CUSTOM_FIELDS.storyPoints];
   let sprints = sprintFieldToJSONString(issue.fields[CUSTOM_FIELDS.sprint]);
-  let status = issue.fields.status.name;
 
   let finalStoryPoints = storyPoints;
-  let finalStatus = status;
   let finalSprints = sprints;
+  let finalStatus = issue.fields.status.name;
 
   for (let history of issue.changelog.histories) {
     const historyTime = new Date(history.created);
@@ -93,16 +92,12 @@ function issueVsSprint(issue, sprint) {
           finalSprints = sprints;
         }
       } else if (item.fieldId === 'status') {
-        status = item.fromString;
-
         if (historyTime > completeTime) {
-          finalStatus = status;
+          finalStatus = item.fromString;
         }
       }
     }
   }
-
-  console.log(sprints, finalSprints);
 
   let outcome = 'NOT_COMPLETED';
   if (finalStatus === 'Done' && sprints === finalSprints) {

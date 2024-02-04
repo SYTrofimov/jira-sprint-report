@@ -227,10 +227,10 @@ test('Issue completed in the sprint', () => {
 //   issue.fields.status = {
 //     name: 'Done',
 //   };
-//   addStatusChange(issue, 'To Do', 'Done', AFTER_SPRINT);
-//   addSprintChange(issue, `${SPRINT.id}`, `${SPRINT.id + 1}`, DURING_SPRINT);
 //   addSprintChange(issue, '', SPRINT.id, BEFORE_SPRINT);
+//   addSprintChange(issue, `${SPRINT.id}`, `${SPRINT.id + 1}`, DURING_SPRINT);
+//   addStatusChange(issue, 'To Do', 'Done', AFTER_SPRINT);
 
 //   const result = issueVsSprint(issue, SPRINT);
-//   expect(result.status).toBe('NOT_COMPLETED');
+//   expect(result.outcome).toBe('NOT_COMPLETED');
 // });

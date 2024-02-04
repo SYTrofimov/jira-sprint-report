@@ -1,7 +1,7 @@
 'use strict';
 import fs from 'fs';
 
-import { initCustomFields, issueStateAtTimes } from '../src/jira-sprint-report.js';
+import { initCustomFields, issueVsSprint } from '../src/jira-sprint-report.js';
 
 async function testOnSavedData() {
   const customFields = JSON.parse(fs.readFileSync('data/custom-fields.json', 'utf8'));
@@ -45,33 +45,33 @@ async function testOnSavedSprint(board, sprint) {
 
   // Testing issues
 
-  const issueStatuses = [];
+  const sprintReportIssueResults = [];
 
-  issueStatuses.push(
+  sprintReportIssueResults.push(
     ...sprintReport.contents.completedIssues.map((issue) => ({
       issue: issue,
-      status: 'COMPLETED',
+      outcome: 'COMPLETED',
     })),
   );
 
-  issueStatuses.push(
+  sprintReportIssueResults.push(
     ...sprintReport.contents.issuesNotCompletedInCurrentSprint.map((issue) => ({
       issue: issue,
-      status: 'NOT_COMPLETED',
+      outcome: 'NOT_COMPLETED',
     })),
   );
 
-  issueStatuses.push(
+  sprintReportIssueResults.push(
     ...sprintReport.contents.puntedIssues.map((issue) => ({
       issue: issue,
-      status: 'PUNTED',
+      outcome: 'PUNTED',
     })),
   );
 
-  issueStatuses.push(
+  sprintReportIssueResults.push(
     ...sprintReport.contents.issuesCompletedInAnotherSprint.map((issue) => ({
       issue: issue,
-      status: 'COMPLETED_IN_ANOTHER_SPRINT',
+      outcome: 'COMPLETED_IN_ANOTHER_SPRINT',
     })),
   );
 
@@ -83,8 +83,8 @@ async function testOnSavedSprint(board, sprint) {
 
   sprintReport.contents.issueKeysAddedDuringSprint;
 
-  for (const { issue, status } of issueStatuses) {
-    console.log(`Testing issue ${issue.key} - ${status}`);
+  for (const { issue, outcome } of sprintReportIssueResults) {
+    console.log(`Testing issue ${issue.key} - ${outcome}`);
   }
 }
 

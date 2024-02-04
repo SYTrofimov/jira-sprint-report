@@ -31,7 +31,7 @@ function initCustomFields(customFields) {
  * @param {Object} sprint - Sprint object from Jira Get Sprint API
  * @returns {Object} an object in the following format:
  * {
- *   status: 'COMPLETED' | 'NOT_COMPLETED' | 'PUNTED' | 'COMPLETED_IN_ANOTHER_SPRINT',
+ *   outcome: 'COMPLETED' | 'NOT_COMPLETED' | 'PUNTED' | 'COMPLETED_IN_ANOTHER_SPRINT',
  *   initialEstimate: float,
  *   finalEstimate: float,
  *   addedDuringSprint: boolean,
@@ -45,15 +45,15 @@ function issueVsSprint(issue, sprint) {
 
   const startTime = new Date(sprint.startDate);
   const completeTime = new Date(sprint.completeDate);
-
-  // now
-  let lastStoryPoints = issue.fields[CUSTOM_FIELDS.storyPoints];
   let lastTime = new Date();
 
-  const result = {};
-  result.finalEstimate = lastStoryPoints;
+  let storyPoints = issue.fields[CUSTOM_FIELDS.storyPoints];
+  let status = issue.fields.status.name;
 
-  result.status = issue.fields.status.name === 'Done' ? 'COMPLETED' : 'NOT_COMPLETED';
+  const result = {};
+  result.finalEstimate = storyPoints;
+
+  result.outcome = issue.fields.status.name === 'Done' ? 'COMPLETED' : 'NOT_COMPLETED';
 
   for (let history of issue.changelog.histories) {
     const historyTime = new Date(history.created);
@@ -65,11 +65,11 @@ function issueVsSprint(issue, sprint) {
 
     for (let item of history.items) {
       if (item.fieldId === CUSTOM_FIELDS.storyPoints) {
-        lastStoryPoints = item.fromString === null ? null : parseFloat(item.fromString);
+        storyPoints = item.fromString === null ? null : parseFloat(item.fromString);
 
         // update finalEstimate, until we cross the sprint complete boundary
         if (historyTime > completeTime) {
-          result.finalEstimate = lastStoryPoints;
+          result.finalEstimate = storyPoints;
         }
       }
     }
@@ -77,7 +77,7 @@ function issueVsSprint(issue, sprint) {
     lastTime = historyTime;
   }
 
-  result.initialEstimate = lastStoryPoints;
+  result.initialEstimate = storyPoints;
 
   return result;
 }

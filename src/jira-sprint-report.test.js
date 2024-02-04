@@ -41,38 +41,65 @@ function makeMinimalIssue() {
   };
 }
 
-function addStoryPointChange(issue, from, to, at) {
-  issue.changelog.histories.push({
-    created: at,
-    items: [
-      {
-        fieldId: 'customfield_storyPoints',
-        fromString: from,
-        toString: to,
-      },
-    ],
-  });
+function addChange(issue, changeItem, at) {
+  const histories = issue.changelog.histories;
+
+  if (histories.length === 0) {
+    issue.changelog.histories.push({
+      created: at,
+      items: [changeItem],
+    });
+  } else {
+    const topDate = new Date(histories[0].created);
+    const newDate = new Date(at);
+
+    if (newDate === topDate) {
+      histories[0].items.push(changeItem);
+    } else if (newDate < topDate) {
+      throw new Error('Changes are not added in the chronological order');
+    } else {
+      issue.changelog.histories.unshift({
+        created: at,
+        items: [changeItem],
+      });
+    }
+  }
 }
 
-function addChange(issue, from, to, at, fieldId) {
-  issue.changelog.histories.push({
-    created: at,
-    items: [
-      {
-        fieldId: fieldId,
-        from: from,
-        to: to,
-      },
-    ],
-  });
+function addStoryPointChange(issue, from, to, at) {
+  addChange(
+    issue,
+    {
+      fieldId: 'customfield_storyPoints',
+      fromString: from,
+      toString: to,
+    },
+    at,
+  );
 }
 
 function addSprintChange(issue, from, to, at) {
-  addChange(issue, from, to, at, 'customfield_sprint');
+  addChange(
+    issue,
+    {
+      fieldId: 'customfield_sprint',
+      from: from,
+      to: to,
+    },
+    at,
+  );
 }
 
 function addStatusChange(issue, from, to, at) {
-  addChange(issue, from, to, at, 'status');
+  addChange(
+    issue,
+    {
+      fieldId: 'status',
+      from: from,
+      to: to,
+    },
+    at,
+  );
 }
 
 test('Changelog.histories missing in issue', () => {
@@ -80,16 +107,6 @@ test('Changelog.histories missing in issue', () => {
   issue.changelog = undefined;
 
   expect(() => issueVsSprint(issue, SPRINT)).toThrow('Missing');
-});
-
-test('Changelog.histories in the wrong order', () => {
-  const issue = makeMinimalIssue();
-  // we will not catch the wrong order before sprint start, but that's okay,
-  // as we are testing the unit tests, not Jira API here
-  addStoryPointChange(issue, '3', '5', DURING_SPRINT);
-  addStoryPointChange(issue, '3', '5', AFTER_SPRINT);
-
-  expect(() => issueVsSprint(issue, SPRINT)).toThrow('wrong order');
 });
 
 test('Story Points null and unchanged', () => {
@@ -184,8 +201,8 @@ test('Issue never completed', () => {
   issue.fields.status = {
     name: 'To Do',
   };
-  addSprintChange(issue, `${SPRINT.id}`, `${SPRINT.id + 1}`, DURING_SPRINT);
   addSprintChange(issue, '', `${SPRINT.id}`, BEFORE_SPRINT);
+  addSprintChange(issue, `${SPRINT.id}`, `${SPRINT.id + 1}`, DURING_SPRINT);
 
   const result = issueVsSprint(issue, SPRINT);
   expect(result.status).toBe('NOT_COMPLETED');
@@ -197,8 +214,8 @@ test('Issue completed in the sprint', () => {
   issue.fields.status = {
     name: 'Done',
   };
-  addStatusChange(issue, 'To Do', 'Done', DURING_SPRINT);
   addSprintChange(issue, '', SPRINT.id, BEFORE_SPRINT);
+  addStatusChange(issue, 'To Do', 'Done', DURING_SPRINT);
 
   const result = issueVsSprint(issue, SPRINT);
   expect(result.status).toBe('COMPLETED');

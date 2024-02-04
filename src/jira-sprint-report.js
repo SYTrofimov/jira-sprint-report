@@ -58,12 +58,6 @@ function issueVsSprint(issue, sprint) {
   for (let history of issue.changelog.histories) {
     const historyTime = new Date(history.created);
 
-    if (historyTime > lastTime) {
-      // we will not catch the wrong order before sprint start, but that's okay,
-      // as we are testing the unit tests, not Jira API here
-      throw new Error('Changelog.histories in the wrong order');
-    }
-
     // crossing the sprint start boundary
     if (historyTime <= startTime) {
       break;

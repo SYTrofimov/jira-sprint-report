@@ -49,7 +49,7 @@ function sprintStringToJSONString(sprint) {
  * @param {Object} sprint - Sprint object from Jira Get Sprint API
  * @returns {Object} an object in the following format:
  * {
- *   status: 'COMPLETED' | 'NOT_COMPLETED' | 'PUNTED' | 'COMPLETED_IN_ANOTHER_SPRINT',
+ *   outcome 'COMPLETED' | 'NOT_COMPLETED' | 'PUNTED' | 'COMPLETED_IN_ANOTHER_SPRINT',
  *   initialEstimate: float,
  *   finalEstimate: float,
  *   addedDuringSprint: boolean,
@@ -107,9 +107,10 @@ function issueVsSprint(issue, sprint) {
   }
 
   const result = {
+    outcome: outcome,
     initialEstimate: storyPoints,
     finalEstimate: finalStoryPoints,
-    outcome: outcome,
+    addedDuringSprint: false,
   };
 
   return result;

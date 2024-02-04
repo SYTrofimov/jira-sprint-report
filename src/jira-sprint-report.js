@@ -24,6 +24,24 @@ function initCustomFields(customFields) {
 }
 
 /**
+ * Convert a sprint field object to a JSON string of sprint IDs
+ * @param {Object} sprint - Sprint field object from Jira Get Sprint Issues API
+ * @returns {string} JSON string of sprint IDs
+ */
+function sprintFieldToJSONString(sprint) {
+  return JSON.stringify(sprint.map((s) => parseInt(s.id)));
+}
+
+/**
+ * Convert a comma/space-separated string of sprint IDs to a JSON string
+ * @param {Object} sprint - Sprint field object from Jira Get Sprint Issues API
+ * @returns {string} a comma/space of sprint IDs
+ */
+function sprintStringToJSONString(sprint) {
+  return JSON.stringify(sprint.split(/, |,/).map((s) => parseInt(s)));
+}
+
+/**
  * Calculate the status of an issue with respect to a given sprint.
  * Sprint must be closed. Issue and sprint must be related.
  * Issue changelog is expected to be sorted by created date in descending order.
@@ -31,7 +49,7 @@ function initCustomFields(customFields) {
  * @param {Object} sprint - Sprint object from Jira Get Sprint API
  * @returns {Object} an object in the following format:
  * {
- *   outcome: 'COMPLETED' | 'NOT_COMPLETED' | 'PUNTED' | 'COMPLETED_IN_ANOTHER_SPRINT',
+ *   status: 'COMPLETED' | 'NOT_COMPLETED' | 'PUNTED' | 'COMPLETED_IN_ANOTHER_SPRINT',
  *   initialEstimate: float,
  *   finalEstimate: float,
  *   addedDuringSprint: boolean,
@@ -45,20 +63,18 @@ function issueVsSprint(issue, sprint) {
 
   const startTime = new Date(sprint.startDate);
   const completeTime = new Date(sprint.completeDate);
-  let lastTime = new Date();
 
   let storyPoints = issue.fields[CUSTOM_FIELDS.storyPoints];
+  let sprints = sprintFieldToJSONString(issue.fields[CUSTOM_FIELDS.sprint]);
   let status = issue.fields.status.name;
 
-  const result = {};
-  result.finalEstimate = storyPoints;
-
-  result.outcome = issue.fields.status.name === 'Done' ? 'COMPLETED' : 'NOT_COMPLETED';
+  let finalStoryPoints = storyPoints;
+  let finalStatus = status;
+  let finalSprints = sprints;
 
   for (let history of issue.changelog.histories) {
     const historyTime = new Date(history.created);
 
-    // crossing the sprint start boundary
     if (historyTime <= startTime) {
       break;
     }
@@ -67,17 +83,39 @@ function issueVsSprint(issue, sprint) {
       if (item.fieldId === CUSTOM_FIELDS.storyPoints) {
         storyPoints = item.fromString === null ? null : parseFloat(item.fromString);
 
-        // update finalEstimate, until we cross the sprint complete boundary
         if (historyTime > completeTime) {
-          result.finalEstimate = storyPoints;
+          finalStoryPoints = storyPoints;
+        }
+      } else if (item.fieldId === CUSTOM_FIELDS.sprint) {
+        sprints = sprintStringToJSONString(item.from);
+
+        if (historyTime > completeTime) {
+          finalSprints = sprints;
+        }
+      } else if (item.fieldId === 'status') {
+        status = item.fromString;
+
+        if (historyTime > completeTime) {
+          finalStatus = status;
         }
       }
     }
-
-    lastTime = historyTime;
   }
 
-  result.initialEstimate = storyPoints;
+  console.log(sprints, finalSprints);
+
+  let outcome = 'NOT_COMPLETED';
+  if (finalStatus === 'Done' && sprints === finalSprints) {
+    outcome = 'COMPLETED';
+  } else if (sprints !== finalSprints) {
+    outcome = 'PUNTED';
+  }
+
+  const result = {
+    initialEstimate: storyPoints,
+    finalEstimate: finalStoryPoints,
+    outcome: outcome,
+  };
 
   return result;
 }

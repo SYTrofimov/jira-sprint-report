@@ -47,44 +47,58 @@ async function testOnSavedSprint(board, sprint) {
 
   const sprintReportIssueResults = [];
 
-  sprintReportIssueResults.push(
-    ...sprintReport.contents.completedIssues.map((issue) => ({
-      issue: issue,
-      outcome: 'COMPLETED',
-    })),
-  );
-
-  sprintReportIssueResults.push(
-    ...sprintReport.contents.issuesNotCompletedInCurrentSprint.map((issue) => ({
-      issue: issue,
-      outcome: 'NOT_COMPLETED',
-    })),
-  );
-
-  sprintReportIssueResults.push(
-    ...sprintReport.contents.puntedIssues.map((issue) => ({
-      issue: issue,
-      outcome: 'PUNTED',
-    })),
-  );
-
-  sprintReportIssueResults.push(
-    ...sprintReport.contents.issuesCompletedInAnotherSprint.map((issue) => ({
-      issue: issue,
-      outcome: 'COMPLETED_IN_ANOTHER_SPRINT',
-    })),
-  );
-
   const issueKeysAddedDuringSprint = new Set();
   for (const issue in sprintReport.contents.issueKeysAddedDuringSprint) {
     issueKeysAddedDuringSprint.add(issue);
   }
   console.log('Issues added during sprint', issueKeysAddedDuringSprint);
 
+  function issueResult(issue, outcome) {
+    return {
+      key: issue.key,
+      outcome: outcome,
+      initialEstimate: issue.estimateStatistic.statFieldValue.value,
+      finalEstimate: issue.currentEstimateStatistic.statFieldValue.value,
+      addedDuringSprint: issueKeysAddedDuringSprint.has(issue.key),
+    };
+  }
+
+  sprintReportIssueResults.push(
+    ...sprintReport.contents.completedIssues.map((issue) => issueResult(issue, 'COMPLETED')),
+  );
+
+  sprintReportIssueResults.push(
+    ...sprintReport.contents.issuesNotCompletedInCurrentSprint.map((issue) =>
+      issueResult(issue, 'NOT_COMPLETED'),
+    ),
+  );
+
+  sprintReportIssueResults.push(
+    ...sprintReport.contents.puntedIssues.map((issue) => issueResult(issue, 'PUNTED')),
+  );
+
+  sprintReportIssueResults.push(
+    ...sprintReport.contents.issuesCompletedInAnotherSprint.map((issue) =>
+      issueResult(issue, 'COMPLETED_IN_ANOTHER_SPRINT'),
+    ),
+  );
+
   sprintReport.contents.issueKeysAddedDuringSprint;
 
-  for (const { issue, outcome } of sprintReportIssueResults) {
-    console.log(`Testing issue ${issue.key} - ${outcome}`);
+  for (const { key, ...jiraResult } of sprintReportIssueResults) {
+    console.log('Testing issue', key);
+
+    const jiraResultJSON = JSON.stringify(jiraResult);
+
+    const issue = issues.find((issue) => issue.key === key);
+    const ourResult = issueVsSprint(issue, sprint);
+    const ourResultJSON = JSON.stringify(ourResult);
+
+    if (jiraResultJSON !== ourResultJSON) {
+      console.error('\x1b[31mResults do not match!\x1b[0m');
+      console.error('Jira sprint report:', jiraResult);
+      console.error('Our sprint report:', ourResult);
+    }
   }
 }
 

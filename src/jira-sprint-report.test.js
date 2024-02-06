@@ -265,7 +265,6 @@ test('Issue completed after spring', () => {
 
 test('Issue removed from sprint', () => {
   const issue = makeMinimalIssue();
-  issue.fields.customfield_sprint.push(SPRINT1);
   issue.fields.customfield_sprint.push(SPRINT2);
   issue.fields.status = {
     name: 'Done',

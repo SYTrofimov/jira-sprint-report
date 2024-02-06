@@ -54,11 +54,14 @@ async function testOnSavedSprint(board, sprint) {
   console.log('Issues added during sprint', issueKeysAddedDuringSprint);
 
   function issueResult(issue, outcome) {
+    const initialEstimate = issue.estimateStatistic.statFieldValue.value;
+    const finalEstimate = issue.currentEstimateStatistic.statFieldValue.value;
+
     return {
       key: issue.key,
       outcome: outcome,
-      initialEstimate: issue.estimateStatistic.statFieldValue.value,
-      finalEstimate: issue.currentEstimateStatistic.statFieldValue.value,
+      initialEstimate: initialEstimate === undefined ? null : initialEstimate,
+      finalEstimate: finalEstimate === undefined ? null : finalEstimate,
       addedDuringSprint: issueKeysAddedDuringSprint.has(issue.key),
     };
   }

@@ -23,7 +23,8 @@ const SPRINT1 = {
 
 const BEFORE_SPRINT = '2023-12-28T15:36:42.765+0000';
 const DURING_SPRINT1 = '2024-01-15T15:36:42.765+0000';
-const DURING_SPRINT2 = '2024-01-16T16:47:51.876+0000';
+const DURING_SPRINT2 = '2024-01-16T15:36:42.765+0000';
+const DURING_SPRINT3 = '2024-01-17T15:36:42.765+0000';
 const JUST_AFTER_SPRINT_COMPLETE = '2024-01-24T09:30:49.765+0000';
 const AFTER_SPRINT = '2024-01-27T15:36:42.765+0000';
 
@@ -74,13 +75,20 @@ function addChange(issue, changeItem, at) {
   }
 }
 
+function toStringOrNull(item) {
+  if (item === null) {
+    return null;
+  }
+  return item.toString();
+}
+
 function addStoryPointChange(issue, from, to, at) {
   addChange(
     issue,
     {
       fieldId: 'customfield_storyPoints',
-      fromString: from,
-      toString: to,
+      fromString: toStringOrNull(from),
+      toString: toStringOrNull(to),
     },
     at,
   );
@@ -91,8 +99,8 @@ function addSprintChange(issue, from, to, at) {
     issue,
     {
       fieldId: 'customfield_sprint',
-      from: from,
-      to: to,
+      from: toStringOrNull(from),
+      to: toStringOrNull(to),
     },
     at,
   );
@@ -103,8 +111,8 @@ function addStatusChange(issue, from, to, at) {
     issue,
     {
       fieldId: 'status',
-      fromString: from,
-      toString: to,
+      fromString: toStringOrNull(from),
+      toString: toStringOrNull(to),
     },
     at,
   );
@@ -141,7 +149,7 @@ test('Story Points unchanged', () => {
 
 test('Story Points changed before sprint', () => {
   const issue = makeMinimalIssue();
-  addStoryPointChange(issue, '3', '5', BEFORE_SPRINT);
+  addStoryPointChange(issue, 3, 5, BEFORE_SPRINT);
 
   const result = issueVsSprint(issue, SPRINT1);
   expect(result.initialEstimate).toBe(5);
@@ -150,7 +158,7 @@ test('Story Points changed before sprint', () => {
 
 test('Story Points changed during sprint', () => {
   const issue = makeMinimalIssue();
-  addStoryPointChange(issue, '3', '5', DURING_SPRINT1);
+  addStoryPointChange(issue, 3, 5, DURING_SPRINT1);
 
   const result = issueVsSprint(issue, SPRINT1);
   expect(result.initialEstimate).toBe(3);
@@ -159,7 +167,7 @@ test('Story Points changed during sprint', () => {
 
 test('Story Points changed from null during sprint', () => {
   const issue = makeMinimalIssue();
-  addStoryPointChange(issue, null, '5', DURING_SPRINT1);
+  addStoryPointChange(issue, null, 5, DURING_SPRINT1);
 
   const result = issueVsSprint(issue, SPRINT1);
   expect(result.initialEstimate).toBeNull();
@@ -169,7 +177,7 @@ test('Story Points changed from null during sprint', () => {
 test('Story Points changed to null during sprint', () => {
   const issue = makeMinimalIssue();
   issue.fields.customfield_storyPoints = null;
-  addStoryPointChange(issue, '5', null, DURING_SPRINT1);
+  addStoryPointChange(issue, 5, null, DURING_SPRINT1);
 
   const result = issueVsSprint(issue, SPRINT1);
   expect(result.initialEstimate).toBe(5);
@@ -178,7 +186,7 @@ test('Story Points changed to null during sprint', () => {
 
 test('Story Points changed after sprint', () => {
   const issue = makeMinimalIssue();
-  addStoryPointChange(issue, '3', '5', AFTER_SPRINT);
+  addStoryPointChange(issue, 3, 5, AFTER_SPRINT);
 
   const result = issueVsSprint(issue, SPRINT1);
   expect(result.initialEstimate).toBe(3);
@@ -187,7 +195,7 @@ test('Story Points changed after sprint', () => {
 
 test('Story Points changed exactly on sprint startDate', () => {
   const issue = makeMinimalIssue();
-  addStoryPointChange(issue, '3', '5', SPRINT1.startDate);
+  addStoryPointChange(issue, 3, 5, SPRINT1.startDate);
 
   const result = issueVsSprint(issue, SPRINT1);
   expect(result.initialEstimate).toBe(5);
@@ -196,7 +204,7 @@ test('Story Points changed exactly on sprint startDate', () => {
 
 test('Story Points changed exactly on sprint completeDate', () => {
   const issue = makeMinimalIssue();
-  addStoryPointChange(issue, '3', '5', SPRINT1.completeDate);
+  addStoryPointChange(issue, 3, 5, SPRINT1.completeDate);
 
   const result = issueVsSprint(issue, SPRINT1);
   expect(result.initialEstimate).toBe(3);
@@ -209,7 +217,7 @@ test('Issue never completed', () => {
   issue.fields.status = {
     name: 'To Do',
   };
-  addSprintChange(issue, '', `${SPRINT1.id}`, BEFORE_SPRINT);
+  addSprintChange(issue, '', SPRINT1.id, BEFORE_SPRINT);
 
   const result = issueVsSprint(issue, SPRINT1);
   expect(result.outcome).toBe('NOT_COMPLETED');
@@ -251,12 +259,7 @@ test('Issue completed after spring', () => {
     name: 'Done',
   };
   addSprintChange(issue, '', SPRINT1.id, BEFORE_SPRINT);
-  addSprintChange(
-    issue,
-    `${SPRINT1.id}`,
-    `${SPRINT1.id}, ${SPRINT2.id}`,
-    JUST_AFTER_SPRINT_COMPLETE,
-  );
+  addSprintChange(issue, SPRINT1.id, `${SPRINT1.id}, ${SPRINT2.id}`, JUST_AFTER_SPRINT_COMPLETE);
   addStatusChange(issue, 'To Do', 'Done', AFTER_SPRINT);
 
   const result = issueVsSprint(issue, SPRINT1);
@@ -270,8 +273,23 @@ test('Issue removed from sprint', () => {
     name: 'Done',
   };
   addSprintChange(issue, '', SPRINT1.id, BEFORE_SPRINT);
-  addSprintChange(issue, `${SPRINT1.id}`, `${SPRINT2.id}`, DURING_SPRINT1);
+  addSprintChange(issue, SPRINT1.id, SPRINT2.id, DURING_SPRINT1);
 
   const result = issueVsSprint(issue, SPRINT1);
   expect(result.outcome).toBe('PUNTED');
+});
+
+test('initialEstimate when added, not when sprint started', () => {
+  const issue = makeMinimalIssue();
+  issue.fields.customfield_sprint.push(SPRINT1);
+  issue.fields.customfield_storyPoints = 5;
+  issue.fields.status = {
+    name: 'Done',
+  };
+  addSprintChange(issue, '', SPRINT2.id, BEFORE_SPRINT);
+  addStoryPointChange(issue, 3, 5, DURING_SPRINT1);
+  addSprintChange(issue, SPRINT2.id, SPRINT1.id, DURING_SPRINT2);
+
+  const result = issueVsSprint(issue, SPRINT1);
+  expect(result.initialEstimate).toBe(5);
 });

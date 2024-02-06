@@ -70,6 +70,8 @@ function issueVsSprint(issue, sprint) {
   let finalLastSprintId = lastSprintId;
   let finalStatus = issue.fields.status.name;
 
+  let addedDuringSprint = false;
+
   for (let history of issue.changelog.histories) {
     const historyTime = new Date(history.created);
 
@@ -78,7 +80,7 @@ function issueVsSprint(issue, sprint) {
     }
 
     for (let item of history.items) {
-      if (item.fieldId === CUSTOM_FIELDS.storyPoints) {
+      if (item.fieldId === CUSTOM_FIELDS.storyPoints && !addedDuringSprint) {
         storyPoints = item.fromString === null ? null : parseFloat(item.fromString);
 
         if (historyTime > completeTime) {
@@ -89,6 +91,11 @@ function issueVsSprint(issue, sprint) {
 
         if (historyTime > completeTime) {
           finalLastSprintId = lastSprintId;
+        } else if (!addedDuringSprint) {
+          const lastToSprintId = lastSprintIdFromSprintString(item.to);
+          if (lastToSprintId === sprint.id) {
+            addedDuringSprint = true;
+          }
         }
       } else if (item.fieldId === 'status') {
         if (historyTime > completeTime) {
@@ -109,7 +116,7 @@ function issueVsSprint(issue, sprint) {
     outcome: outcome,
     initialEstimate: storyPoints,
     finalEstimate: finalStoryPoints,
-    addedDuringSprint: lastSprintId !== sprint.id,
+    addedDuringSprint: addedDuringSprint,
   };
 
   return result;

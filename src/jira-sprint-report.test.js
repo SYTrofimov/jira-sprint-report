@@ -254,7 +254,7 @@ test('Issue completed after spring', () => {
   addSprintChange(
     issue,
     `${SPRINT1.id}`,
-    `${SPRINT1.id}, ${SPRINT1.id + 1}`,
+    `${SPRINT1.id}, ${SPRINT2.id}`,
     JUST_AFTER_SPRINT_COMPLETE,
   );
   addStatusChange(issue, 'To Do', 'Done', AFTER_SPRINT);
@@ -271,7 +271,7 @@ test('Issue removed from sprint', () => {
     name: 'Done',
   };
   addSprintChange(issue, '', SPRINT1.id, BEFORE_SPRINT);
-  addSprintChange(issue, `${SPRINT1.id}`, `${SPRINT1.id}, ${SPRINT1.id + 1}`, DURING_SPRINT1);
+  addSprintChange(issue, `${SPRINT1.id}`, `${SPRINT2.id}`, DURING_SPRINT1);
 
   const result = issueVsSprint(issue, SPRINT1);
   expect(result.outcome).toBe('PUNTED');

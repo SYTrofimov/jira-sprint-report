@@ -24,7 +24,6 @@ const SPRINT1 = {
 const BEFORE_SPRINT = '2023-12-28T15:36:42.765+0000';
 const DURING_SPRINT1 = '2024-01-15T15:36:42.765+0000';
 const DURING_SPRINT2 = '2024-01-16T15:36:42.765+0000';
-const DURING_SPRINT3 = '2024-01-17T15:36:42.765+0000';
 const JUST_AFTER_SPRINT_COMPLETE = '2024-01-24T09:30:49.765+0000';
 const AFTER_SPRINT = '2024-01-27T15:36:42.765+0000';
 
@@ -251,6 +250,17 @@ test('Issue completed in the sprint, added during sprint', () => {
   expect(result.addedDuringSprint).toBe(true);
 });
 
+test('Issue added from next sprint, not completed', () => {
+  const issue = makeMinimalIssue();
+  issue.fields.customfield_sprint.push(SPRINT1);
+  issue.fields.customfield_sprint.push(SPRINT2);
+  addSprintChange(issue, SPRINT2.id, SPRINT1.id, DURING_SPRINT1);
+  addSprintChange(issue, SPRINT1.id, `${SPRINT1.id}, ${SPRINT2.id}`, JUST_AFTER_SPRINT_COMPLETE);
+
+  const result = issueVsSprint(issue, SPRINT1);
+  expect(result.outcome).toBe('NOT_COMPLETED');
+});
+
 test('Issue completed after spring', () => {
   const issue = makeMinimalIssue();
   issue.fields.customfield_sprint.push(SPRINT1);
@@ -282,11 +292,6 @@ test('Issue removed from sprint', () => {
 test('initialEstimate when added, not when sprint started', () => {
   const issue = makeMinimalIssue();
   issue.fields.customfield_sprint.push(SPRINT1);
-  issue.fields.customfield_storyPoints = 5;
-  issue.fields.status = {
-    name: 'Done',
-  };
-  addSprintChange(issue, '', SPRINT2.id, BEFORE_SPRINT);
   addStoryPointChange(issue, 3, 5, DURING_SPRINT1);
   addSprintChange(issue, SPRINT2.id, SPRINT1.id, DURING_SPRINT2);
 

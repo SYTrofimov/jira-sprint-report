@@ -75,12 +75,12 @@ function issueVsSprint(issue, sprint) {
   for (let history of issue.changelog.histories) {
     const historyTime = new Date(history.created);
 
-    if (historyTime <= startTime) {
+    if (historyTime <= startTime || addedDuringSprint) {
       break;
     }
 
     for (let item of history.items) {
-      if (item.fieldId === CUSTOM_FIELDS.storyPoints && !addedDuringSprint) {
+      if (item.fieldId === CUSTOM_FIELDS.storyPoints) {
         storyPoints = item.fromString === null ? null : parseFloat(item.fromString);
 
         if (historyTime > completeTime) {
@@ -91,10 +91,12 @@ function issueVsSprint(issue, sprint) {
 
         if (historyTime > completeTime) {
           finalLastSprintId = lastSprintId;
-        } else if (!addedDuringSprint) {
+        } else {
           const lastToSprintId = lastSprintIdFromSprintString(item.to);
           if (lastToSprintId === sprint.id) {
+            lastSprintId = lastToSprintId;
             addedDuringSprint = true;
+            break;
           }
         }
       } else if (item.fieldId === 'status') {

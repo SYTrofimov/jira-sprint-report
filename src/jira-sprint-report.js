@@ -59,8 +59,14 @@ function issueVsSprint(issue, sprint) {
   if (issue === undefined) {
     throw new Error('issue is undefined');
   }
-  if (!issue.changelog) {
-    throw new Error(`Missing changelog in issue ${issue.key}`);
+  if (issue.fields[CUSTOM_FIELDS.sprint] === undefined) {
+    throw new Error(`Missing Sprint custom field in issue ${issue.key}`);
+  }
+  if (issue.fields[CUSTOM_FIELDS.storyPoints] === undefined) {
+    throw new Error(`Missing Story Points custom field in issue ${issue.key}`);
+  }
+  if (issue.changelog === undefined || issue.changelog.histories === undefined) {
+    throw new Error(`Missing changelog.histories in issue ${issue.key}`);
   }
 
   const startTime = new Date(sprint.startDate);

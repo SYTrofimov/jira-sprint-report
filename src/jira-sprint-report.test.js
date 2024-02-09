@@ -297,24 +297,24 @@ describe('Input validation', () => {
     expect(() => issueVsSprint(undefined, SPRINT1)).toThrow('issue is undefined');
   });
 
-  test('Changelog.histories missing in issue', () => {
+  test('No changelog.histories in issue', () => {
     const issue = makeMinimalIssue();
     issue.changelog = undefined;
 
     expect(() => issueVsSprint(issue, SPRINT1)).toThrow('Missing');
   });
 
-  // test('No sprint field in issue', () => {
-  //   const issue = makeMinimalIssue();
-  //   issue.fields.customfield_sprint = undefined;
+  test('No Sprint custom field in issue', () => {
+    const issue = makeMinimalIssue();
+    issue.fields.customfield_sprint = undefined;
 
-  //   expect(() => issueVsSprint(issue, SPRINT1)).toThrow('Missing');
-  // });
+    expect(() => issueVsSprint(issue, SPRINT1)).toThrow('Missing');
+  });
 
-  // test('No status', () => {
-  //   const issue = makeMinimalIssue();
-  //   issue.fields.status = undefined;
+  test('No Story Points custom field in issue', () => {
+    const issue = makeMinimalIssue();
+    issue.fields.customfield_storyPoints = undefined;
 
-  //   expect(() => issueVsSprint(issue, SPRINT1)).toThrow('Missing');
-  // });
+    expect(() => issueVsSprint(issue, SPRINT1)).toThrow('Missing');
+  });
 });

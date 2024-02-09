@@ -56,6 +56,9 @@ function lastSprintIdFromSprintString(sprintString) {
  * @throws {Error} if required fields are missing
  */
 function issueVsSprint(issue, sprint) {
+  if (issue === undefined) {
+    throw new Error('issue is undefined');
+  }
   if (!issue.changelog) {
     throw new Error(`Missing changelog in issue ${issue.key}`);
   }

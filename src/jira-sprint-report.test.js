@@ -1,7 +1,7 @@
 'use strict';
 // @ts-check
 
-import { test, expect, beforeAll } from '@jest/globals';
+import { test, expect, describe, beforeAll } from '@jest/globals';
 import { initCustomFields, issueVsSprint } from './jira-sprint-report.js';
 
 beforeAll(() => {
@@ -116,13 +116,6 @@ function addStatusChange(issue, from, to, at) {
     at,
   );
 }
-
-test('Changelog.histories missing in issue', () => {
-  const issue = makeMinimalIssue();
-  issue.changelog = undefined;
-
-  expect(() => issueVsSprint(issue, SPRINT1)).toThrow('Missing');
-});
 
 test('Story Points null and unchanged', () => {
   const issue = makeMinimalIssue();
@@ -297,4 +290,31 @@ test('initialEstimate when added, not when sprint started', () => {
 
   const result = issueVsSprint(issue, SPRINT1);
   expect(result.initialEstimate).toBe(5);
+});
+
+describe('Input validation', () => {
+  test('Issue is undefined', () => {
+    expect(() => issueVsSprint(undefined, SPRINT1)).toThrow('issue is undefined');
+  });
+
+  test('Changelog.histories missing in issue', () => {
+    const issue = makeMinimalIssue();
+    issue.changelog = undefined;
+
+    expect(() => issueVsSprint(issue, SPRINT1)).toThrow('Missing');
+  });
+
+  // test('No sprint field in issue', () => {
+  //   const issue = makeMinimalIssue();
+  //   issue.fields.customfield_sprint = undefined;
+
+  //   expect(() => issueVsSprint(issue, SPRINT1)).toThrow('Missing');
+  // });
+
+  // test('No status', () => {
+  //   const issue = makeMinimalIssue();
+  //   issue.fields.status = undefined;
+
+  //   expect(() => issueVsSprint(issue, SPRINT1)).toThrow('Missing');
+  // });
 });

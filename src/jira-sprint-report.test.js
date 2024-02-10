@@ -98,8 +98,8 @@ function addSprintChange(issue, from, to, at) {
     issue,
     {
       fieldId: 'customfield_sprint',
-      from: toStringOrNull(from),
-      to: toStringOrNull(to),
+      from: from.toString(),
+      to: to.toString(),
     },
     at,
   );
@@ -110,8 +110,8 @@ function addStatusChange(issue, from, to, at) {
     issue,
     {
       fieldId: 'status',
-      fromString: toStringOrNull(from),
-      toString: toStringOrNull(to),
+      fromString: from,
+      toString: to,
     },
     at,
   );
@@ -320,3 +320,12 @@ describe('jiraSprintReport', () => {
     expect(result.initialEstimate).toBe(5);
   });
 });
+
+// describe('issueRemovedFromSprints', () => {
+//   test('Issue removed from active sprint', () => {
+//     const issue = makeMinimalIssue();
+//     addSprintChange(issue, SPRINT1.id, '', DURING_SPRINT2);
+
+//     expect(issueRemovedFromActiveSprints(issue)).toBe(false);
+//   });
+// });

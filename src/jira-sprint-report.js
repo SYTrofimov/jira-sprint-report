@@ -40,6 +40,15 @@ function lastSprintIdFromSprintString(sprintString) {
   return parseInt(chunks[chunks.length - 1]);
 }
 
+function sprintIdsFromSprintString(sprintString) {
+  if (!sprintString) {
+    return null;
+  }
+
+  const chunks = sprintString.split(/, |,/);
+  return chunks.map((chunk) => parseInt(chunk));
+}
+
 /**
  * Calculate the status of an issue with respect to a given sprint.
  * Sprint must be closed. Issue and sprint must be related.
@@ -133,4 +142,22 @@ function issueSprintReport(issue, sprint) {
   return result;
 }
 
-export { initCustomFields, issueSprintReport };
+function issueRemovedFromSprints(issue) {
+  const sprintIds = new Set();
+
+  for (let history of issue.changelog.histories) {
+    for (let item of history.items) {
+      if (item.fieldId === CUSTOM_FIELDS.sprint) {
+        const lastFromSprintId = lastSprintIdFromSprintString(item.from);
+        const toSprintIds = sprintIdsFromSprintString(item.to);
+        if (lastFromSprintId !== null) {
+          sprintIds.add(lastFromSprintId);
+        }
+      }
+    }
+  }
+
+  return sprintIds;
+}
+
+export { initCustomFields, issueSprintReport, issueRemovedFromSprints };

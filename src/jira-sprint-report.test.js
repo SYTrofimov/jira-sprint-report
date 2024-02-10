@@ -2,7 +2,11 @@
 // @ts-check
 
 import { test, expect, describe, beforeAll } from '@jest/globals';
-import { initCustomFields, issueSprintReport } from './jira-sprint-report.js';
+import {
+  initCustomFields,
+  issueSprintReport,
+  issueRemovedFromSprints,
+} from './jira-sprint-report.js';
 
 beforeAll(() => {
   initCustomFields({
@@ -321,11 +325,28 @@ describe('jiraSprintReport', () => {
   });
 });
 
-// describe('issueRemovedFromSprints', () => {
-//   test('Issue removed from active sprint', () => {
-//     const issue = makeMinimalIssue();
-//     addSprintChange(issue, SPRINT1.id, '', DURING_SPRINT2);
+describe('issueRemovedFromSprints', () => {
+  test('Issue removed from sprint', () => {
+    const issue = makeMinimalIssue();
+    addSprintChange(issue, '', SPRINT1.id, DURING_SPRINT1);
+    addSprintChange(issue, SPRINT1.id, '', DURING_SPRINT1);
 
-//     expect(issueRemovedFromActiveSprints(issue)).toBe(false);
-//   });
-// });
+    const sprintIds = issueRemovedFromSprints(issue);
+
+    expect(sprintIds.size).toBe(1);
+    expect(sprintIds.has(SPRINT1.id)).toBe(true);
+  });
+
+  test('Issue removed from 2 sprints', () => {
+    const issue = makeMinimalIssue();
+    addSprintChange(issue, '', SPRINT1.id, DURING_SPRINT1);
+    addSprintChange(issue, SPRINT1.id, SPRINT2.id, DURING_SPRINT2);
+    addSprintChange(issue, SPRINT2.id, '', AFTER_SPRINT);
+
+    const sprintIds = issueRemovedFromSprints(issue);
+
+    expect(sprintIds.size).toBe(2);
+    expect(sprintIds.has(SPRINT1.id)).toBe(true);
+    expect(sprintIds.has(SPRINT2.id)).toBe(true);
+  });
+});

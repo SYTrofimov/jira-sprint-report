@@ -55,7 +55,7 @@ function lastSprintIdFromSprintString(sprintString) {
  * }
  * @throws {Error} if required fields are missing
  */
-function issueVsSprint(issue, sprint) {
+function issueSprintReport(issue, sprint) {
   if (issue === undefined) {
     throw new Error('issue is undefined');
   }
@@ -133,4 +133,4 @@ function issueVsSprint(issue, sprint) {
   return result;
 }
 
-export { initCustomFields, issueVsSprint };
+export { initCustomFields, issueSprintReport };

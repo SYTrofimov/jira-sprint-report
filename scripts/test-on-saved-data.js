@@ -1,7 +1,7 @@
 'use strict';
 import fs from 'fs';
 
-import { initCustomFields, issueVsSprint } from '../src/jira-sprint-report.js';
+import { initCustomFields, issueSprintReport } from '../src/jira-sprint-report.js';
 
 async function testOnSavedData() {
   const customFields = JSON.parse(fs.readFileSync('data/custom-fields.json', 'utf8'));
@@ -94,7 +94,12 @@ async function testOnSavedSprint(board, sprint) {
     const jiraResultJSON = JSON.stringify(jiraResult);
 
     const issue = issues.find((issue) => issue.key === key);
-    const ourResult = issueVsSprint(issue, sprint);
+
+    if (!issue) {
+      console.log('Found');
+    }
+
+    const ourResult = issueSprintReport(issue, sprint);
     const ourResultJSON = JSON.stringify(ourResult);
 
     if (jiraResultJSON !== ourResultJSON) {

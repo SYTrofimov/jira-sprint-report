@@ -3,6 +3,8 @@ import fs from 'fs';
 
 import { jiraGet, jiraGetItems } from './utils.js';
 
+const CUSTOM_FIELDS = JSON.parse(fs.readFileSync('data/custom-fields.json', 'utf8'));
+
 async function saveListedBoardSprints() {
   const boards = JSON.parse(fs.readFileSync('data/boards.json', 'utf8'));
   for (const board of boards) {
@@ -43,7 +45,9 @@ async function saveSprintData(board, sprint) {
 
   // Get sprint issues
   const issues = await jiraGetItems(
-    `rest/agile/1.0/board/${board.id}/sprint/${sprint.id}/issue?expand=changelog`,
+    `rest/agile/1.0/board/${board.id}/sprint/${sprint.id}/issue` +
+      `?fields=status,${CUSTOM_FIELDS.sprint},${CUSTOM_FIELDS.storyPoints}` +
+      `&expand=changelog`,
     'issues',
   );
   fs.writeFileSync(sprintPathPrefix + 'sprint-issues.json', JSON.stringify(issues, null, 2));

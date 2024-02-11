@@ -53,7 +53,7 @@ function lastSprintIdFromSprintString(sprintString) {
  *   finalEstimate: float,
  *   addedDuringSprint: boolean,
  * }
- * @throws {Error} if required fields are missing
+ * @throws {Error} if required fields are missing (not all missing fields are handled explicitly)
  */
 function issueSprintReport(issue, sprint) {
   if (issue === undefined) {
@@ -154,7 +154,7 @@ function sprintIdsFromSprintString(sprintString) {
  * @param {Object} issue - Issue object from the Jira Get Sprint Issues API call, including changelog
  * @param {Object} sprintsById - A map from sprint Id to Sprint objects from the Jira Get Sprint API call
  * @returns {Set} - A set of sprint Ids
- * @throws {Error} if required fields are missing
+ * @throws {Error} if required fields are missing (not all missing fields are handled explicitly)
  */
 function issueRemovedFromActiveSprints(issue, sprintsById) {
   const sprintIds = new Set();

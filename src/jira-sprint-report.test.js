@@ -47,7 +47,13 @@ const SPRINT2 = {
   id: 6,
   state: 'future',
   name: 'AC Sprint 2',
+  startDate: '2024-02-10T10:00:29.712Z',
+  endDate: '2024-02-24T10:00:11.000Z',
+  completeDate: '2024-02-24T09:30:49.472Z',
+  createdDate: '2024-02-10T09:00:17.954Z',
 };
+
+const DURING_SPRINT2 = '2024-02-15T15:36:42.765+0000';
 
 function makeMinimalIssue() {
   return {
@@ -378,27 +384,47 @@ describe('issueRemovedFromSprints', () => {
     expect(sprintIds.size).toBe(0);
   });
 
-  test('Issue removed from sprint', () => {
+  test('Issue removed from active sprint', () => {
     const issue = makeMinimalIssue();
-    addSprintChange(issue, '', SPRINT1.id, DURING_SPRINT1);
+    addSprintChange(issue, '', SPRINT1.id, BEFORE_SPRINT1);
     addSprintChange(issue, SPRINT1.id, '', DURING_SPRINT1);
 
-    const sprintIds = issueRemovedFromActiveSprints(issue);
+    const sprintIds = issueRemovedFromActiveSprints(issue, SPRINTS_BY_ID);
 
     expect(sprintIds.size).toBe(1);
     expect(sprintIds.has(SPRINT1.id)).toBe(true);
   });
 
-  test('Issue removed from 2 sprints', () => {
+  test('Sprint id remains in the Sprint field (issue not completed in a sprint)', () => {
     const issue = makeMinimalIssue();
-    addSprintChange(issue, '', SPRINT1.id, DURING_SPRINT1);
-    addSprintChange(issue, SPRINT1.id, SPRINT2.id, DURING_SPRINT1_2);
-    addSprintChange(issue, SPRINT2.id, '', AFTER_SPRINT1);
+    addSprintChange(issue, '', SPRINT1.id, BEFORE_SPRINT1);
+    addSprintChange(issue, SPRINT1.id, `${SPRINT1.id}, ${SPRINT2.id}`, JUST_AFTER_SPRINT1_COMPLETE);
+
+    const sprintIds = issueRemovedFromActiveSprints(issue, SPRINTS_BY_ID);
+
+    expect(sprintIds.size).toBe(0);
+  });
+
+  test('Issue removed from 2 active sprints', () => {
+    const issue = makeMinimalIssue();
+    addSprintChange(issue, '', SPRINT1.id, BEFORE_SPRINT1);
+    addSprintChange(issue, SPRINT1.id, SPRINT2.id, DURING_SPRINT1);
+    addSprintChange(issue, SPRINT2.id, '', DURING_SPRINT2);
 
     const sprintIds = issueRemovedFromActiveSprints(issue, SPRINTS_BY_ID);
 
     expect(sprintIds.size).toBe(2);
     expect(sprintIds.has(SPRINT1.id)).toBe(true);
     expect(sprintIds.has(SPRINT2.id)).toBe(true);
+  });
+
+  test.skip('Issue removed from non-active sprint', () => {
+    const issue = makeMinimalIssue();
+    addSprintChange(issue, '', SPRINT1.id, BEFORE_SPRINT1);
+    addSprintChange(issue, SPRINT1.id, '', AFTER_SPRINT1);
+
+    const sprintIds = issueRemovedFromActiveSprints(issue);
+
+    expect(sprintIds.size).toBe(0);
   });
 });

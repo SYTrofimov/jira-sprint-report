@@ -40,15 +40,6 @@ function lastSprintIdFromSprintString(sprintString) {
   return parseInt(chunks[chunks.length - 1]);
 }
 
-function sprintIdsFromSprintString(sprintString) {
-  if (!sprintString) {
-    return null;
-  }
-
-  const chunks = sprintString.split(/, |,/);
-  return chunks.map((chunk) => parseInt(chunk));
-}
-
 /**
  * Determine the relationship of an issue with respect to a given sprint that can be used
  * in a sprint report. Sprint must be closed. Issue and sprint must be related.
@@ -142,6 +133,21 @@ function issueSprintReport(issue, sprint) {
   return result;
 }
 
+function sprintIdsFromSprintString(sprintString) {
+  if (!sprintString) {
+    return null;
+  }
+
+  const chunks = sprintString.split(/, |,/);
+
+  const sprintIds = new Set();
+  for (let chunk of chunks) {
+    sprintIds.add(parseInt(chunk));
+  }
+
+  return sprintIds;
+}
+
 /**
  * Return a Set of sprint Ids, from which a given issue was removed, while they were active.
  * Issue changelog is expected to be sorted by created date in descending order.
@@ -158,7 +164,9 @@ function issueRemovedFromActiveSprints(issue, sprintsById) {
       if (item.fieldId === CUSTOM_FIELDS.sprint) {
         const lastFromSprintId = lastSprintIdFromSprintString(item.from);
         const toSprintIds = sprintIdsFromSprintString(item.to);
-        if (lastFromSprintId !== null) {
+        if (lastFromSprintId !== null && (!toSprintIds || !toSprintIds.has(lastFromSprintId))) {
+          const sprint = sprintsById[lastFromSprintId];
+
           sprintIds.add(lastFromSprintId);
         }
       }

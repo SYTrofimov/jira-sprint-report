@@ -167,7 +167,13 @@ function issueRemovedFromActiveSprints(issue, sprintsById) {
         if (lastFromSprintId !== null && (!toSprintIds || !toSprintIds.has(lastFromSprintId))) {
           const sprint = sprintsById[lastFromSprintId];
 
-          sprintIds.add(lastFromSprintId);
+          const startTime = new Date(sprint.startDate);
+          const completeTime = new Date(sprint.completeDate);
+          const historyTime = new Date(history.created);
+
+          if (historyTime >= startTime && historyTime <= completeTime) {
+            sprintIds.add(lastFromSprintId);
+          }
         }
       }
     }

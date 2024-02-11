@@ -395,7 +395,7 @@ describe('issueRemovedFromSprints', () => {
     expect(sprintIds.has(SPRINT1.id)).toBe(true);
   });
 
-  test('Sprint id remains in the Sprint field (issue not completed in a sprint)', () => {
+  test('Sprint id remains in the Sprint field (issue not completed)', () => {
     const issue = makeMinimalIssue();
     addSprintChange(issue, '', SPRINT1.id, BEFORE_SPRINT1);
     addSprintChange(issue, SPRINT1.id, `${SPRINT1.id}, ${SPRINT2.id}`, JUST_AFTER_SPRINT1_COMPLETE);
@@ -418,12 +418,12 @@ describe('issueRemovedFromSprints', () => {
     expect(sprintIds.has(SPRINT2.id)).toBe(true);
   });
 
-  test.skip('Issue removed from non-active sprint', () => {
+  test('Issue removed from non-active sprint', () => {
     const issue = makeMinimalIssue();
     addSprintChange(issue, '', SPRINT1.id, BEFORE_SPRINT1);
     addSprintChange(issue, SPRINT1.id, '', AFTER_SPRINT1);
 
-    const sprintIds = issueRemovedFromActiveSprints(issue);
+    const sprintIds = issueRemovedFromActiveSprints(issue, SPRINTS_BY_ID);
 
     expect(sprintIds.size).toBe(0);
   });

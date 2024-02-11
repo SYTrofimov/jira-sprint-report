@@ -53,3 +53,6 @@ Thumbs.db
 
 # Transient test data
 data/
+
+# Test coverage reports
+coverage/

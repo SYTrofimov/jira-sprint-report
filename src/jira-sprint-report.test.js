@@ -133,6 +133,12 @@ function addStatusChange(issue, from, to, at) {
   );
 }
 
+function addDummyChange(issue) {
+  addChange(issue, {
+    fieldId: 'dummy',
+  });
+}
+
 describe('jiraSprintReport input validation', () => {
   test('Issue is undefined', () => {
     expect(() => issueSprintReport(undefined, SPRINT1)).toThrow('issue is undefined');
@@ -161,6 +167,18 @@ describe('jiraSprintReport input validation', () => {
 });
 
 describe('jiraSprintReport', () => {
+  test('No relevant changes in changelog', () => {
+    const issue = makeMinimalIssue();
+    addDummyChange(issue);
+
+    const result = issueSprintReport(issue, SPRINT1);
+
+    expect(result.outcome).toBe('NOT_COMPLETED');
+    expect(result.initialEstimate).toBe(5);
+    expect(result.finalEstimate).toBe(5);
+    expect(result.addedDuringSprint).toBe(false);
+  });
+
   test('Story Points null and unchanged', () => {
     const issue = makeMinimalIssue();
     issue.fields.customfield_storyPoints = null;
@@ -338,6 +356,23 @@ describe('jiraSprintReport', () => {
 });
 
 describe('issueRemovedFromSprints', () => {
+  test('No changes in changelog', () => {
+    const issue = makeMinimalIssue();
+
+    const sprintIds = issueRemovedFromSprints(issue);
+
+    expect(sprintIds.size).toBe(0);
+  });
+
+  test('No relevant changes in changelog', () => {
+    const issue = makeMinimalIssue();
+    addDummyChange(issue);
+
+    const sprintIds = issueRemovedFromSprints(issue);
+
+    expect(sprintIds.size).toBe(0);
+  });
+
   test('Issue removed from sprint', () => {
     const issue = makeMinimalIssue();
     addSprintChange(issue, '', SPRINT1.id, DURING_SPRINT1);

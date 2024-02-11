@@ -15,6 +15,18 @@ beforeAll(() => {
   });
 });
 
+describe('initCustomFields', () => {
+  test('Missing storyPoints', () => {
+    expect(() => initCustomFields({ sprint: 'customfield_sprint' })).toThrow('Missing storyPoints');
+  });
+
+  test('Missing sprint', () => {
+    expect(() => initCustomFields({ storyPoints: 'customfield_storyPoints' })).toThrow(
+      'Missing sprint',
+    );
+  });
+});
+
 const SPRINT1 = {
   id: 5,
   state: 'closed',

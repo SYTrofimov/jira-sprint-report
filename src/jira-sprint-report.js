@@ -50,12 +50,12 @@ function sprintIdsFromSprintString(sprintString) {
 }
 
 /**
- * Calculate the status of an issue with respect to a given sprint.
- * Sprint must be closed. Issue and sprint must be related.
+ * Determine the relationship of an issue with respect to a given sprint that can be used
+ * in a sprint report. Sprint must be closed. Issue and sprint must be related.
  * Issue changelog is expected to be sorted by created date in descending order.
  * @param {Object} issue - Issue object from Jira Get Sprint Issues API, including changelog
  * @param {Object} sprint - Sprint object from Jira Get Sprint API
- * @returns {Object} an object in the following format:
+ * @returns {Object} - An object in the following format:
  * {
  *   outcome 'COMPLETED' | 'NOT_COMPLETED' | 'PUNTED' | 'COMPLETED_IN_ANOTHER_SPRINT',
  *   initialEstimate: float,
@@ -142,7 +142,15 @@ function issueSprintReport(issue, sprint) {
   return result;
 }
 
-function issueRemovedFromSprints(issue) {
+/**
+ * Return a Set of sprint Ids, from which a given issue was removed, while they were active.
+ * Issue changelog is expected to be sorted by created date in descending order.
+ * @param {Object} issue - Issue object from the Jira Get Sprint Issues API call, including changelog
+ * @param {Object} sprintsById - A map from sprint Id to Sprint objects from the Jira Get Sprint API call
+ * @returns {Set} - A set of sprint Ids
+ * @throws {Error} if required fields are missing
+ */
+function issueRemovedFromActiveSprints(issue, sprintsById) {
   const sprintIds = new Set();
 
   for (let history of issue.changelog.histories) {
@@ -160,4 +168,4 @@ function issueRemovedFromSprints(issue) {
   return sprintIds;
 }
 
-export { initCustomFields, issueSprintReport, issueRemovedFromSprints };
+export { initCustomFields, issueSprintReport, issueRemovedFromActiveSprints };

@@ -5,7 +5,7 @@ import { test, expect, describe, beforeAll } from '@jest/globals';
 import {
   initCustomFields,
   issueSprintReport,
-  issueRemovedFromSprints,
+  issueRemovedFromActiveSprints,
 } from './jira-sprint-report.js';
 
 beforeAll(() => {
@@ -355,11 +355,16 @@ describe('jiraSprintReport', () => {
   });
 });
 
+const SPRINTS_BY_ID = {
+  [SPRINT1.id]: SPRINT1,
+  [SPRINT2.id]: SPRINT2,
+};
+
 describe('issueRemovedFromSprints', () => {
   test('No changes in changelog', () => {
     const issue = makeMinimalIssue();
 
-    const sprintIds = issueRemovedFromSprints(issue);
+    const sprintIds = issueRemovedFromActiveSprints(issue);
 
     expect(sprintIds.size).toBe(0);
   });
@@ -368,7 +373,7 @@ describe('issueRemovedFromSprints', () => {
     const issue = makeMinimalIssue();
     addDummyChange(issue);
 
-    const sprintIds = issueRemovedFromSprints(issue);
+    const sprintIds = issueRemovedFromActiveSprints(issue);
 
     expect(sprintIds.size).toBe(0);
   });
@@ -378,7 +383,7 @@ describe('issueRemovedFromSprints', () => {
     addSprintChange(issue, '', SPRINT1.id, DURING_SPRINT1);
     addSprintChange(issue, SPRINT1.id, '', DURING_SPRINT1);
 
-    const sprintIds = issueRemovedFromSprints(issue);
+    const sprintIds = issueRemovedFromActiveSprints(issue);
 
     expect(sprintIds.size).toBe(1);
     expect(sprintIds.has(SPRINT1.id)).toBe(true);
@@ -390,7 +395,7 @@ describe('issueRemovedFromSprints', () => {
     addSprintChange(issue, SPRINT1.id, SPRINT2.id, DURING_SPRINT2);
     addSprintChange(issue, SPRINT2.id, '', AFTER_SPRINT);
 
-    const sprintIds = issueRemovedFromSprints(issue);
+    const sprintIds = issueRemovedFromActiveSprints(issue, SPRINTS_BY_ID);
 
     expect(sprintIds.size).toBe(2);
     expect(sprintIds.has(SPRINT1.id)).toBe(true);

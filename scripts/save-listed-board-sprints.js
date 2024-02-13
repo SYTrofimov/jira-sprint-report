@@ -31,14 +31,16 @@ async function saveBoardData(board) {
   fs.writeFileSync(boardPath + '/velocity.json', JSON.stringify(velocity, null, 2));
   console.log('Saved GreenHopper velocity report');
 
-  const backlogIssues = await jiraGetItems(
-    `rest/agile/1.0/board/${board.id}/backlog` +
-      `?fields=status,${CUSTOM_FIELDS.sprint},${CUSTOM_FIELDS.storyPoints}` +
-      `&expand=changelog`,
-    'issues',
-  );
-  fs.writeFileSync(boardPath + '/backlog-issues.json', JSON.stringify(backlogIssues, null, 2));
-  console.log(`Saved ${backlogIssues.length} backlog issues`);
+  let url =
+    `rest/agile/1.0/board/${board.id}/issue` +
+    `?fields=status,${CUSTOM_FIELDS.sprint},${CUSTOM_FIELDS.storyPoints}` +
+    `&expand=changelog`;
+  if (sprints.length > 0 && sprints[0].startDate !== undefined) {
+    url += `&jql=updated>="${sprints[0].startDate.substring(0, 10)}"`;
+  }
+  const updatedIssues = await jiraGetItems(url, 'issues');
+  fs.writeFileSync(boardPath + '/updated-issues.json', JSON.stringify(updatedIssues, null, 2));
+  console.log(`Saved ${updatedIssues.length} updated issues`);
 
   for (const sprint of sprints) {
     await saveSprintData(board, sprint);

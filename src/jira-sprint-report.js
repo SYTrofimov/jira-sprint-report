@@ -152,7 +152,7 @@ function sprintIdsFromSprintString(sprintString) {
  * Return a Set of sprint Ids, from which a given issue was removed, while they were active.
  * Issue changelog is expected to be sorted by created date in descending order.
  * @param {Object} issue - Issue object from the Jira Get Sprint Issues API call, including changelog
- * @param {Object} sprintsById - A map from sprint Id to Sprint objects from the Jira Get Sprint API call
+ * @param {Map} sprintsById - A map from sprint Id to Sprint objects from the Jira Get Sprint API call
  * @returns {Set} - A set of sprint Ids
  * @throws {Error} if required fields are missing (not all missing fields are handled explicitly)
  */
@@ -165,7 +165,7 @@ function issueRemovedFromActiveSprints(issue, sprintsById) {
         const lastFromSprintId = lastSprintIdFromSprintString(item.from);
         const toSprintIds = sprintIdsFromSprintString(item.to);
         if (lastFromSprintId !== null && (!toSprintIds || !toSprintIds.has(lastFromSprintId))) {
-          const sprint = sprintsById[lastFromSprintId];
+          const sprint = sprintsById.get(lastFromSprintId);
 
           const startTime = new Date(sprint.startDate);
           const completeTime = new Date(sprint.completeDate);

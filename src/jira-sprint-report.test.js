@@ -361,10 +361,10 @@ describe('jiraSprintReport', () => {
   });
 });
 
-const SPRINTS_BY_ID = {
-  [SPRINT1.id]: SPRINT1,
-  [SPRINT2.id]: SPRINT2,
-};
+const SPRINTS_BY_ID = new Map([
+  [SPRINT1.id, SPRINT1],
+  [SPRINT2.id, SPRINT2],
+]);
 
 describe('issueRemovedFromSprints', () => {
   test('No changes in changelog', () => {

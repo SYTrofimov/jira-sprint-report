@@ -1,7 +1,13 @@
 'use strict';
+// @ts-check
+
 import fs from 'fs';
 
-import { initCustomFields, issueSprintReport } from '../src/jira-sprint-report.js';
+import {
+  initCustomFields,
+  issueSprintReport,
+  issueRemovedFromActiveSprints,
+} from '../src/jira-sprint-report.js';
 
 async function testOnSavedData() {
   const customFields = JSON.parse(fs.readFileSync('data/custom-fields.json', 'utf8'));
@@ -13,6 +19,18 @@ async function testOnSavedData() {
   }
 }
 
+function collectRemovedIssuesBySprint(issues, sprintsById, outRemovedIssuesBySprintId) {
+  for (const issue of issues) {
+    const sprintIds = issueRemovedFromActiveSprints(issue, sprintsById);
+    for (const sprintId of sprintIds) {
+      if (!outRemovedIssuesBySprintId.has(sprintId)) {
+        outRemovedIssuesBySprintId.set(sprintId, new Set());
+      }
+      outRemovedIssuesBySprintId.get(sprintId).add(issue);
+    }
+  }
+}
+
 async function testOnSavedBoard(board) {
   console.log(`Testing velocity on board ${board.id} - ${board.name}`);
 
@@ -20,13 +38,20 @@ async function testOnSavedBoard(board) {
 
   const sprints = JSON.parse(fs.readFileSync(boardPath + '/sprints.json', 'utf8'));
   console.log(`Loaded ${sprints.length} board sprints`);
+  const sprintsById = new Map(sprints.map((sprint) => [sprint.id, sprint]));
+
+  const updatedIssues = JSON.parse(fs.readFileSync(boardPath + '/updated-issues.json', 'utf8'));
+  console.log(`Loaded ${updatedIssues.length} updated issues`);
+
+  const removedIssuesBySprintId = new Map();
+  collectRemovedIssuesBySprint(updatedIssues, sprintsById, removedIssuesBySprintId);
 
   for (const sprint of sprints) {
-    await testOnSavedSprint(board, sprint);
+    await testOnSavedSprint(board, sprint, removedIssuesBySprintId.get(sprint.id) || new Set());
   }
 }
 
-async function testOnSavedSprint(board, sprint) {
+async function testOnSavedSprint(board, sprint, removedIssues) {
   if (sprint.state !== 'closed') {
     return;
   }
@@ -35,11 +60,9 @@ async function testOnSavedSprint(board, sprint) {
 
   const sprintPathPrefix = `data/board-${board.id}/${sprint.id}-`;
 
-  // Get sprint issues
   const issues = JSON.parse(fs.readFileSync(sprintPathPrefix + 'sprint-issues.json', 'utf8'));
   console.log(`Loaded ${issues.length} issues`);
 
-  // Get GreenHopper sprint report
   const sprintReport = JSON.parse(fs.readFileSync(sprintPathPrefix + 'sprintreport.json', 'utf8'));
   console.log(`Loaded GreenHopper sprint report`);
 
@@ -93,10 +116,14 @@ async function testOnSavedSprint(board, sprint) {
 
     const jiraResultJSON = JSON.stringify(jiraResult);
 
-    const issue = issues.find((issue) => issue.key === key);
-
+    let issue = issues.find((issue) => issue.key === key);
     if (!issue) {
-      console.log('Found');
+      for (const removedIssue of removedIssues) {
+        if (removedIssue.key === key) {
+          issue = removedIssue;
+          break;
+        }
+      }
     }
 
     const ourResult = issueSprintReport(issue, sprint);

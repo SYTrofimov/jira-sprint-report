@@ -40,6 +40,7 @@ const SPRINT1 = {
 const BEFORE_SPRINT1 = '2023-12-28T15:36:42.765+0000';
 const DURING_SPRINT1 = '2024-01-15T15:36:42.765+0000';
 const DURING_SPRINT1_2 = '2024-01-16T15:36:42.765+0000';
+const DURING_SPRINT1_3 = '2024-01-17T15:36:42.765+0000';
 const JUST_AFTER_SPRINT1_COMPLETE = '2024-01-24T09:30:49.765+0000';
 const AFTER_SPRINT1 = '2024-01-27T15:36:42.765+0000';
 
@@ -55,7 +56,7 @@ const SPRINT2 = {
 
 const DURING_SPRINT2 = '2024-02-15T15:36:42.765+0000';
 
-function makeMinimalIssue() {
+function makeIssue() {
   return {
     key: 'KEY-1',
     changelog: {
@@ -63,7 +64,7 @@ function makeMinimalIssue() {
     },
     fields: {
       customfield_storyPoints: 5,
-      customfield_sprint: [],
+      customfield_sprint: [SPRINT1],
       status: {
         name: 'To Do',
       },
@@ -151,21 +152,21 @@ describe('jiraSprintReport input validation', () => {
   });
 
   test('No changelog.histories in issue', () => {
-    const issue = makeMinimalIssue();
+    const issue = makeIssue();
     issue.changelog = undefined;
 
     expect(() => issueSprintReport(issue, SPRINT1)).toThrow('Missing');
   });
 
   test('No Sprint custom field in issue', () => {
-    const issue = makeMinimalIssue();
+    const issue = makeIssue();
     issue.fields.customfield_sprint = undefined;
 
     expect(() => issueSprintReport(issue, SPRINT1)).toThrow('Missing');
   });
 
   test('No Story Points custom field in issue', () => {
-    const issue = makeMinimalIssue();
+    const issue = makeIssue();
     issue.fields.customfield_storyPoints = undefined;
 
     expect(() => issueSprintReport(issue, SPRINT1)).toThrow('Missing');
@@ -173,20 +174,21 @@ describe('jiraSprintReport input validation', () => {
 });
 
 describe('jiraSprintReport', () => {
-  test('No relevant changes in changelog', () => {
-    const issue = makeMinimalIssue();
+  test.skip('Issue not related to sprint', () => {
+    const issue = makeIssue();
+    issue.fields.customfield_sprint = [SPRINT2];
     addDummyChange(issue);
 
     const result = issueSprintReport(issue, SPRINT1);
 
-    expect(result.outcome).toBe('NOT_COMPLETED');
-    expect(result.initialEstimate).toBe(5);
-    expect(result.finalEstimate).toBe(5);
-    expect(result.addedDuringSprint).toBe(false);
+    expect(result.outcome).toBe('NOT_RELATED');
+    expect(result.initialEstimate).toBeUndefined();
+    expect(result.finalEstimate).toBeUndefined();
+    expect(result.addedDuringSprint).toBeUndefined;
   });
 
   test('Story Points null and unchanged', () => {
-    const issue = makeMinimalIssue();
+    const issue = makeIssue();
     issue.fields.customfield_storyPoints = null;
 
     const result = issueSprintReport(issue, SPRINT1);
@@ -195,7 +197,7 @@ describe('jiraSprintReport', () => {
   });
 
   test('Story Points unchanged', () => {
-    const issue = makeMinimalIssue();
+    const issue = makeIssue();
 
     let result = issueSprintReport(issue, SPRINT1);
     expect(result.initialEstimate).toBe(5);
@@ -208,7 +210,7 @@ describe('jiraSprintReport', () => {
   });
 
   test('Story Points changed before sprint', () => {
-    const issue = makeMinimalIssue();
+    const issue = makeIssue();
     addStoryPointChange(issue, 3, 5, BEFORE_SPRINT1);
 
     const result = issueSprintReport(issue, SPRINT1);
@@ -217,7 +219,7 @@ describe('jiraSprintReport', () => {
   });
 
   test('Story Points changed during sprint', () => {
-    const issue = makeMinimalIssue();
+    const issue = makeIssue();
     addStoryPointChange(issue, 3, 5, DURING_SPRINT1);
 
     const result = issueSprintReport(issue, SPRINT1);
@@ -226,7 +228,7 @@ describe('jiraSprintReport', () => {
   });
 
   test('Story Points changed from null during sprint', () => {
-    const issue = makeMinimalIssue();
+    const issue = makeIssue();
     addStoryPointChange(issue, null, 5, DURING_SPRINT1);
 
     const result = issueSprintReport(issue, SPRINT1);
@@ -235,7 +237,7 @@ describe('jiraSprintReport', () => {
   });
 
   test('Story Points changed to null during sprint', () => {
-    const issue = makeMinimalIssue();
+    const issue = makeIssue();
     issue.fields.customfield_storyPoints = null;
     addStoryPointChange(issue, 5, null, DURING_SPRINT1);
 
@@ -245,7 +247,7 @@ describe('jiraSprintReport', () => {
   });
 
   test('Story Points changed after sprint', () => {
-    const issue = makeMinimalIssue();
+    const issue = makeIssue();
     addStoryPointChange(issue, 3, 5, AFTER_SPRINT1);
 
     const result = issueSprintReport(issue, SPRINT1);
@@ -254,7 +256,7 @@ describe('jiraSprintReport', () => {
   });
 
   test('Story Points changed exactly on sprint startDate', () => {
-    const issue = makeMinimalIssue();
+    const issue = makeIssue();
     addStoryPointChange(issue, 3, 5, SPRINT1.startDate);
 
     const result = issueSprintReport(issue, SPRINT1);
@@ -263,7 +265,7 @@ describe('jiraSprintReport', () => {
   });
 
   test('Story Points changed exactly on sprint completeDate', () => {
-    const issue = makeMinimalIssue();
+    const issue = makeIssue();
     addStoryPointChange(issue, 3, 5, SPRINT1.completeDate);
 
     const result = issueSprintReport(issue, SPRINT1);
@@ -272,8 +274,7 @@ describe('jiraSprintReport', () => {
   });
 
   test('Issue never completed', () => {
-    const issue = makeMinimalIssue();
-    issue.fields.customfield_sprint.push(SPRINT1);
+    const issue = makeIssue();
     issue.fields.status = {
       name: 'To Do',
     };
@@ -283,9 +284,8 @@ describe('jiraSprintReport', () => {
     expect(result.outcome).toBe('NOT_COMPLETED');
   });
 
-  test('Issue completed in the sprint, was there from the start', () => {
-    const issue = makeMinimalIssue();
-    issue.fields.customfield_sprint.push(SPRINT1);
+  test('Issue was in the sprint from the start, completed', () => {
+    const issue = makeIssue();
     issue.fields.status = {
       name: 'Done',
     };
@@ -297,9 +297,8 @@ describe('jiraSprintReport', () => {
     expect(result.addedDuringSprint).toBe(false);
   });
 
-  test('Issue completed in the sprint, added during sprint', () => {
-    const issue = makeMinimalIssue();
-    issue.fields.customfield_sprint.push(SPRINT1);
+  test('Issue added during sprint, completed', () => {
+    const issue = makeIssue();
     issue.fields.status = {
       name: 'Done',
     };
@@ -311,9 +310,22 @@ describe('jiraSprintReport', () => {
     expect(result.addedDuringSprint).toBe(true);
   });
 
+  test.skip('Issue removed and added back during sprint, completed', () => {
+    const issue = makeIssue();
+    issue.fields.status = {
+      name: 'Done',
+    };
+    addSprintChange(issue, SPRINT1.id, '', DURING_SPRINT1);
+    addSprintChange(issue, '', SPRINT1.id, DURING_SPRINT1_2);
+    addStatusChange(issue, 'To Do', 'Done', DURING_SPRINT1_3);
+
+    const result = issueSprintReport(issue, SPRINT1);
+    expect(result.outcome).toBe('COMPLETED');
+    expect(result.addedDuringSprint).toBe(false);
+  });
+
   test('Issue added from next sprint, not completed', () => {
-    const issue = makeMinimalIssue();
-    issue.fields.customfield_sprint.push(SPRINT1);
+    const issue = makeIssue();
     issue.fields.customfield_sprint.push(SPRINT2);
     addSprintChange(issue, SPRINT2.id, SPRINT1.id, DURING_SPRINT1);
     addSprintChange(issue, SPRINT1.id, `${SPRINT1.id}, ${SPRINT2.id}`, JUST_AFTER_SPRINT1_COMPLETE);
@@ -322,9 +334,8 @@ describe('jiraSprintReport', () => {
     expect(result.outcome).toBe('NOT_COMPLETED');
   });
 
-  test('Issue completed after spring', () => {
-    const issue = makeMinimalIssue();
-    issue.fields.customfield_sprint.push(SPRINT1);
+  test('Issue completed after sprint', () => {
+    const issue = makeIssue();
     issue.fields.customfield_sprint.push(SPRINT2);
     issue.fields.status = {
       name: 'Done',
@@ -338,8 +349,8 @@ describe('jiraSprintReport', () => {
   });
 
   test('Issue removed from sprint', () => {
-    const issue = makeMinimalIssue();
-    issue.fields.customfield_sprint.push(SPRINT2);
+    const issue = makeIssue();
+    issue.fields.customfield_sprint = [SPRINT2];
     issue.fields.status = {
       name: 'Done',
     };
@@ -351,8 +362,7 @@ describe('jiraSprintReport', () => {
   });
 
   test('initialEstimate when added, not when sprint started', () => {
-    const issue = makeMinimalIssue();
-    issue.fields.customfield_sprint.push(SPRINT1);
+    const issue = makeIssue();
     addStoryPointChange(issue, 3, 5, DURING_SPRINT1);
     addSprintChange(issue, SPRINT2.id, SPRINT1.id, DURING_SPRINT1_2);
 
@@ -368,7 +378,7 @@ const SPRINTS_BY_ID = new Map([
 
 describe('issueRemovedFromSprints', () => {
   test('No changes in changelog', () => {
-    const issue = makeMinimalIssue();
+    const issue = makeIssue();
 
     const sprintIds = issueRemovedFromActiveSprints(issue);
 
@@ -376,7 +386,7 @@ describe('issueRemovedFromSprints', () => {
   });
 
   test('No relevant changes in changelog', () => {
-    const issue = makeMinimalIssue();
+    const issue = makeIssue();
     addDummyChange(issue);
 
     const sprintIds = issueRemovedFromActiveSprints(issue);
@@ -385,7 +395,7 @@ describe('issueRemovedFromSprints', () => {
   });
 
   test('Issue removed from active sprint', () => {
-    const issue = makeMinimalIssue();
+    const issue = makeIssue();
     addSprintChange(issue, '', SPRINT1.id, BEFORE_SPRINT1);
     addSprintChange(issue, SPRINT1.id, '', DURING_SPRINT1);
 
@@ -396,7 +406,7 @@ describe('issueRemovedFromSprints', () => {
   });
 
   test('Sprint id remains in the Sprint field (issue not completed)', () => {
-    const issue = makeMinimalIssue();
+    const issue = makeIssue();
     addSprintChange(issue, '', SPRINT1.id, BEFORE_SPRINT1);
     addSprintChange(issue, SPRINT1.id, `${SPRINT1.id}, ${SPRINT2.id}`, JUST_AFTER_SPRINT1_COMPLETE);
 
@@ -406,7 +416,7 @@ describe('issueRemovedFromSprints', () => {
   });
 
   test('Issue removed from 2 active sprints', () => {
-    const issue = makeMinimalIssue();
+    const issue = makeIssue();
     addSprintChange(issue, '', SPRINT1.id, BEFORE_SPRINT1);
     addSprintChange(issue, SPRINT1.id, SPRINT2.id, DURING_SPRINT1);
     addSprintChange(issue, SPRINT2.id, '', DURING_SPRINT2);
@@ -419,7 +429,7 @@ describe('issueRemovedFromSprints', () => {
   });
 
   test('Issue removed from non-active sprint', () => {
-    const issue = makeMinimalIssue();
+    const issue = makeIssue();
     addSprintChange(issue, '', SPRINT1.id, BEFORE_SPRINT1);
     addSprintChange(issue, SPRINT1.id, '', AFTER_SPRINT1);
 

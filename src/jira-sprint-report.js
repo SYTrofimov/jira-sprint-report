@@ -24,7 +24,7 @@ function initCustomFields(customFields) {
 }
 
 function lastSprintIdFromSprintField(sprintField) {
-  if (sprintField.length === 0) {
+  if (!sprintField || sprintField.length === 0) {
     return null;
   }
 

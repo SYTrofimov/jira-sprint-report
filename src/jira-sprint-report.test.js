@@ -174,14 +174,14 @@ describe('jiraSprintReport input validation', () => {
 });
 
 describe('jiraSprintReport', () => {
-  test.skip('Issue not related to sprint', () => {
+  test('Issue not relevant for sprint', () => {
     const issue = makeIssue();
-    issue.fields.customfield_sprint = [SPRINT2];
+    issue.fields.customfield_sprint = [];
     addDummyChange(issue);
 
     const result = issueSprintReport(issue, SPRINT1);
 
-    expect(result.outcome).toBe('NOT_RELATED');
+    expect(result.outcome).toBe('NOT_RELEVANT');
     expect(result.initialEstimate).toBeUndefined();
     expect(result.finalEstimate).toBeUndefined();
     expect(result.addedDuringSprint).toBeUndefined;

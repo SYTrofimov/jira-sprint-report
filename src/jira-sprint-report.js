@@ -48,7 +48,7 @@ function lastSprintIdFromSprintString(sprintString) {
  * @param {Object} sprint - Sprint object from Jira Get Sprint API
  * @returns {Object} - An object in the following format:
  * {
- *   outcome 'COMPLETED' | 'NOT_COMPLETED' | 'PUNTED' | 'COMPLETED_IN_ANOTHER_SPRINT',
+ *   outcome 'COMPLETED' | 'NOT_COMPLETED' | 'PUNTED' | 'NOT_RELEVANT',
  *   initialEstimate: float,
  *   finalEstimate: float,
  *   addedDuringSprint: boolean,
@@ -73,10 +73,12 @@ function issueSprintReport(issue, sprint) {
   const completeTime = new Date(sprint.completeDate);
 
   let storyPoints = issue.fields[CUSTOM_FIELDS.storyPoints];
-  let lastSprintId = lastSprintIdFromSprintField(issue.fields[CUSTOM_FIELDS.sprint]);
+  let sprintId = lastSprintIdFromSprintField(issue.fields[CUSTOM_FIELDS.sprint]);
+
+  let storyPointsWhenAdded;
 
   let finalStoryPoints = storyPoints;
-  let finalLastSprintId = lastSprintId;
+  let finalLastSprintId = sprintId;
   let finalStatus = issue.fields.status.name;
 
   let addedDuringSprint = false;
@@ -84,7 +86,7 @@ function issueSprintReport(issue, sprint) {
   for (let history of issue.changelog.histories) {
     const historyTime = new Date(history.created);
 
-    if (historyTime <= startTime || addedDuringSprint) {
+    if (historyTime <= startTime) {
       break;
     }
 
@@ -96,16 +98,16 @@ function issueSprintReport(issue, sprint) {
           finalStoryPoints = storyPoints;
         }
       } else if (item.fieldId === CUSTOM_FIELDS.sprint) {
-        lastSprintId = lastSprintIdFromSprintString(item.from);
+        sprintId = lastSprintIdFromSprintString(item.from);
 
         if (historyTime > completeTime) {
-          finalLastSprintId = lastSprintId;
+          finalLastSprintId = sprintId;
         } else {
           const lastToSprintId = lastSprintIdFromSprintString(item.to);
           if (lastToSprintId === sprint.id) {
-            lastSprintId = lastToSprintId;
+            sprintId = lastToSprintId;
+            storyPointsWhenAdded = storyPoints;
             addedDuringSprint = true;
-            break;
           }
         }
       } else if (item.fieldId === 'status') {
@@ -116,16 +118,20 @@ function issueSprintReport(issue, sprint) {
     }
   }
 
+  if (sprintId !== sprint.id && finalLastSprintId !== sprint.id && !addedDuringSprint) {
+    return { outcome: 'NOT_RELEVANT' };
+  }
+
   let outcome = 'NOT_COMPLETED';
   if (finalStatus === 'Done' && finalLastSprintId === sprint.id) {
     outcome = 'COMPLETED';
-  } else if (lastSprintId !== finalLastSprintId) {
+  } else if (sprintId !== finalLastSprintId) {
     outcome = 'PUNTED';
   }
 
   const result = {
     outcome: outcome,
-    initialEstimate: storyPoints,
+    initialEstimate: addedDuringSprint ? storyPointsWhenAdded : storyPoints,
     finalEstimate: finalStoryPoints,
     addedDuringSprint: addedDuringSprint,
   };

@@ -9,7 +9,7 @@ import {
   issueRemovedFromActiveSprints,
 } from '../src/jira-sprint-report.js';
 
-async function testOnSavedData() {
+async function testOnSavedBoards() {
   const customFields = JSON.parse(fs.readFileSync('data/custom-fields.json', 'utf8'));
   initCustomFields(customFields);
 
@@ -137,4 +137,4 @@ async function testOnSavedSprint(board, sprint, removedIssues) {
   }
 }
 
-await testOnSavedData();
+await testOnSavedBoards();

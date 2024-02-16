@@ -5,14 +5,14 @@ import { jiraGet, jiraGetItems } from './utils.js';
 
 const CUSTOM_FIELDS = JSON.parse(fs.readFileSync('data/custom-fields.json', 'utf8'));
 
-async function saveListedBoardSprints() {
+async function saveListedBoards() {
   const boards = JSON.parse(fs.readFileSync('data/boards.json', 'utf8'));
   for (const board of boards) {
-    await saveBoardData(board);
+    await saveBoard(board);
   }
 }
 
-async function saveBoardData(board) {
+async function saveBoard(board) {
   console.log(`Saving board ${board.id} - ${board.name}`);
 
   const boardPath = `data/board-${board.id}`;
@@ -43,11 +43,11 @@ async function saveBoardData(board) {
   console.log(`Saved ${updatedIssues.length} updated issues`);
 
   for (const sprint of sprints) {
-    await saveSprintData(board, sprint);
+    await saveSprint(board, sprint);
   }
 }
 
-async function saveSprintData(board, sprint) {
+async function saveSprint(board, sprint) {
   console.log(`Saving sprint ${sprint.id} - ${sprint.name}`);
 
   const sprintPathPrefix = `data/board-${board.id}/${sprint.id}-`;
@@ -68,4 +68,4 @@ async function saveSprintData(board, sprint) {
   console.log('Saved GreenHopper sprint report');
 }
 
-await saveListedBoardSprints();
+await saveListedBoards();

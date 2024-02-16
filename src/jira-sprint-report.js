@@ -41,9 +41,8 @@ function lastSprintIdFromSprintString(sprintString) {
 }
 
 /**
- * Determine the relationship of an issue with respect to a given sprint that can be used
- * in a sprint report. Sprint must be closed. Issue and sprint must be related.
- * Issue changelog is expected to be sorted by created date in descending order.
+ * Determine the relationship of an issue with respect to a given sprint for a sprint report.
+ * Sprint must be closed. Issue changelog is expected to be sorted by created date in descending order.
  * @param {Object} issue - Issue object from Jira Get Sprint Issues API, including changelog
  * @param {Object} sprint - Sprint object from Jira Get Sprint API
  * @returns {Object} - An object in the following format:
@@ -156,37 +155,43 @@ function sprintIdsFromSprintString(sprintString) {
 }
 
 /**
- * Return a Set of sprint Ids, from which a given issue was removed, while they were active.
+ * Determine the issues from the given issues that were removed from active sprints.
  * Issue changelog is expected to be sorted by created date in descending order.
- * @param {Object} issue - Issue object from the Jira Get Sprint Issues API call, including changelog
- * @param {Map} sprintsById - A map from sprint Id to Sprint objects from the Jira Get Sprint API call
- * @returns {Set} - A set of sprint Ids
+ * @param {Array<Object>} issues - Array of Issue objects from the Jira Get Sprint Issues API call,
+ * including changelog
+ * @param {Map<Number, Object>} sprintsById - A map from sprint Id to Sprint objects from the Jira
+ * Get Sprint API call
+ * @returns {Map<Number, Set<Object>>} - A Map from SprintIds to a Set of Issues.
  * @throws {Error} if required fields are missing (not all missing fields are handled explicitly)
  */
-function issueRemovedFromActiveSprints(issue, sprintsById) {
-  const sprintIds = new Set();
+function removedIssuesBySprintId(issues, sprintsById) {
+  const removedIssuesBySprintIdMap = new Map();
+  for (const issue of issues) {
+    for (let history of issue.changelog.histories) {
+      for (let item of history.items) {
+        if (item.fieldId === CUSTOM_FIELDS.sprint) {
+          const fromSprintId = lastSprintIdFromSprintString(item.from);
+          const toSprintIds = sprintIdsFromSprintString(item.to);
+          if (fromSprintId !== null && (!toSprintIds || !toSprintIds.has(fromSprintId))) {
+            const sprint = sprintsById.get(fromSprintId);
 
-  for (let history of issue.changelog.histories) {
-    for (let item of history.items) {
-      if (item.fieldId === CUSTOM_FIELDS.sprint) {
-        const lastFromSprintId = lastSprintIdFromSprintString(item.from);
-        const toSprintIds = sprintIdsFromSprintString(item.to);
-        if (lastFromSprintId !== null && (!toSprintIds || !toSprintIds.has(lastFromSprintId))) {
-          const sprint = sprintsById.get(lastFromSprintId);
+            const startTime = new Date(sprint.startDate);
+            const completeTime = new Date(sprint.completeDate);
+            const historyTime = new Date(history.created);
 
-          const startTime = new Date(sprint.startDate);
-          const completeTime = new Date(sprint.completeDate);
-          const historyTime = new Date(history.created);
-
-          if (historyTime >= startTime && historyTime <= completeTime) {
-            sprintIds.add(lastFromSprintId);
+            if (historyTime >= startTime && historyTime <= completeTime) {
+              if (!removedIssuesBySprintIdMap.has(sprint.id)) {
+                removedIssuesBySprintIdMap.set(sprint.id, new Set());
+              }
+              removedIssuesBySprintIdMap.get(sprint.id).add(issue);
+            }
           }
         }
       }
     }
   }
 
-  return sprintIds;
+  return removedIssuesBySprintIdMap;
 }
 
-export { initCustomFields, issueSprintReport, issueRemovedFromActiveSprints };
+export { initCustomFields, issueSprintReport, removedIssuesBySprintId };

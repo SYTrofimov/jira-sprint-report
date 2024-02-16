@@ -5,7 +5,7 @@ import { test, expect, describe, beforeAll } from '@jest/globals';
 import {
   initCustomFields,
   issueSprintReport,
-  issueRemovedFromActiveSprints,
+  removedIssuesBySprintId,
 } from './jira-sprint-report.js';
 
 beforeAll(() => {
@@ -378,41 +378,44 @@ const SPRINTS_BY_ID = new Map([
 
 describe('issueRemovedFromSprints', () => {
   test('No changes in changelog', () => {
-    const issue = makeIssue();
+    const issues = [makeIssue()];
 
-    const sprintIds = issueRemovedFromActiveSprints(issue);
+    const issuesBySprintId = removedIssuesBySprintId(issues, SPRINTS_BY_ID);
 
-    expect(sprintIds.size).toBe(0);
+    expect(issuesBySprintId.size).toBe(0);
   });
 
   test('No relevant changes in changelog', () => {
     const issue = makeIssue();
     addDummyChange(issue);
+    const issues = [issue];
 
-    const sprintIds = issueRemovedFromActiveSprints(issue);
+    const issuesBySprintId = removedIssuesBySprintId(issues, SPRINTS_BY_ID);
 
-    expect(sprintIds.size).toBe(0);
+    expect(issuesBySprintId.size).toBe(0);
   });
 
   test('Issue removed from active sprint', () => {
     const issue = makeIssue();
     addSprintChange(issue, '', SPRINT1.id, BEFORE_SPRINT1);
     addSprintChange(issue, SPRINT1.id, '', DURING_SPRINT1);
+    const issues = [issue];
 
-    const sprintIds = issueRemovedFromActiveSprints(issue, SPRINTS_BY_ID);
+    const issuesBySprintId = removedIssuesBySprintId(issues, SPRINTS_BY_ID);
 
-    expect(sprintIds.size).toBe(1);
-    expect(sprintIds.has(SPRINT1.id)).toBe(true);
+    expect(issuesBySprintId.size).toBe(1);
+    expect(issuesBySprintId.get(SPRINT1.id).has(issue)).toBe(true);
   });
 
   test('Sprint id remains in the Sprint field (issue not completed)', () => {
     const issue = makeIssue();
     addSprintChange(issue, '', SPRINT1.id, BEFORE_SPRINT1);
     addSprintChange(issue, SPRINT1.id, `${SPRINT1.id}, ${SPRINT2.id}`, JUST_AFTER_SPRINT1_COMPLETE);
+    const issues = [issue];
 
-    const sprintIds = issueRemovedFromActiveSprints(issue, SPRINTS_BY_ID);
+    const issuesBySprintId = removedIssuesBySprintId(issues, SPRINTS_BY_ID);
 
-    expect(sprintIds.size).toBe(0);
+    expect(issuesBySprintId.size).toBe(0);
   });
 
   test('Issue removed from 2 active sprints', () => {
@@ -420,21 +423,23 @@ describe('issueRemovedFromSprints', () => {
     addSprintChange(issue, '', SPRINT1.id, BEFORE_SPRINT1);
     addSprintChange(issue, SPRINT1.id, SPRINT2.id, DURING_SPRINT1);
     addSprintChange(issue, SPRINT2.id, '', DURING_SPRINT2);
+    const issues = [issue];
 
-    const sprintIds = issueRemovedFromActiveSprints(issue, SPRINTS_BY_ID);
+    const issuesBySprintId = removedIssuesBySprintId(issues, SPRINTS_BY_ID);
 
-    expect(sprintIds.size).toBe(2);
-    expect(sprintIds.has(SPRINT1.id)).toBe(true);
-    expect(sprintIds.has(SPRINT2.id)).toBe(true);
+    expect(issuesBySprintId.size).toBe(2);
+    expect(issuesBySprintId.get(SPRINT1.id).has(issue)).toBe(true);
+    expect(issuesBySprintId.get(SPRINT2.id).has(issue)).toBe(true);
   });
 
   test('Issue removed from non-active sprint', () => {
     const issue = makeIssue();
     addSprintChange(issue, '', SPRINT1.id, BEFORE_SPRINT1);
     addSprintChange(issue, SPRINT1.id, '', AFTER_SPRINT1);
+    const issues = [issue];
 
-    const sprintIds = issueRemovedFromActiveSprints(issue, SPRINTS_BY_ID);
+    const issuesBySprintId = removedIssuesBySprintId(issues, SPRINTS_BY_ID);
 
-    expect(sprintIds.size).toBe(0);
+    expect(issuesBySprintId.size).toBe(0);
   });
 });

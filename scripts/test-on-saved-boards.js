@@ -6,7 +6,7 @@ import fs from 'fs';
 import {
   initCustomFields,
   issueSprintReport,
-  issueRemovedFromActiveSprints,
+  removedIssuesBySprintId,
 } from '../src/jira-sprint-report.js';
 
 async function testOnSavedBoards() {
@@ -16,18 +16,6 @@ async function testOnSavedBoards() {
   const boards = JSON.parse(fs.readFileSync('data/boards.json', 'utf8'));
   for (const board of boards) {
     await testOnSavedBoard(board);
-  }
-}
-
-function collectRemovedIssuesBySprint(issues, sprintsById, outRemovedIssuesBySprintId) {
-  for (const issue of issues) {
-    const sprintIds = issueRemovedFromActiveSprints(issue, sprintsById);
-    for (const sprintId of sprintIds) {
-      if (!outRemovedIssuesBySprintId.has(sprintId)) {
-        outRemovedIssuesBySprintId.set(sprintId, new Set());
-      }
-      outRemovedIssuesBySprintId.get(sprintId).add(issue);
-    }
   }
 }
 
@@ -43,11 +31,10 @@ async function testOnSavedBoard(board) {
   const updatedIssues = JSON.parse(fs.readFileSync(boardPath + '/updated-issues.json', 'utf8'));
   console.log(`Loaded ${updatedIssues.length} updated issues`);
 
-  const removedIssuesBySprintId = new Map();
-  collectRemovedIssuesBySprint(updatedIssues, sprintsById, removedIssuesBySprintId);
+  const removedIssuesBySprintIdMap = removedIssuesBySprintId(updatedIssues, sprintsById);
 
   for (const sprint of sprints) {
-    await testOnSavedSprint(board, sprint, removedIssuesBySprintId.get(sprint.id) || new Set());
+    await testOnSavedSprint(board, sprint, removedIssuesBySprintIdMap.get(sprint.id) || new Set());
   }
 }
 

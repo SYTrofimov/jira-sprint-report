@@ -407,6 +407,22 @@ describe('issueRemovedFromSprints', () => {
     expect(issuesBySprintId.get(SPRINT1.id).has(issue)).toBe(true);
   });
 
+  test('2 issues removed from active sprint', () => {
+    const issue1 = makeIssue();
+    addSprintChange(issue1, '', SPRINT1.id, BEFORE_SPRINT1);
+    addSprintChange(issue1, SPRINT1.id, '', DURING_SPRINT1);
+    const issue2 = makeIssue();
+    addSprintChange(issue2, '', SPRINT1.id, BEFORE_SPRINT1);
+    addSprintChange(issue2, SPRINT1.id, '', DURING_SPRINT1);
+    const issues = [issue1, issue2];
+
+    const issuesBySprintId = removedIssuesBySprintId(issues, SPRINTS_BY_ID);
+
+    expect(issuesBySprintId.size).toBe(1);
+    expect(issuesBySprintId.get(SPRINT1.id).has(issue1)).toBe(true);
+    expect(issuesBySprintId.get(SPRINT1.id).has(issue2)).toBe(true);
+  });
+
   test('Sprint id remains in the Sprint field (issue not completed)', () => {
     const issue = makeIssue();
     addSprintChange(issue, '', SPRINT1.id, BEFORE_SPRINT1);

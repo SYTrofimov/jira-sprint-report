@@ -190,7 +190,6 @@ function removedIssuesBySprintId(issues, sprintsById) {
       }
     }
   }
-
   return removedIssuesBySprintIdMap;
 }
 

@@ -174,7 +174,7 @@ describe('jiraSprintReport input validation', () => {
 });
 
 describe('jiraSprintReport', () => {
-  test('Issue not relevant for sprint', () => {
+  test('Issue not relevant for sprint, never in sprint', () => {
     const issue = makeIssue();
     issue.fields.customfield_sprint = [];
     addDummyChange(issue);
@@ -310,7 +310,7 @@ describe('jiraSprintReport', () => {
     expect(result.addedDuringSprint).toBe(true);
   });
 
-  test.skip('Issue removed and added back during sprint, completed', () => {
+  test('Issue removed and added back during sprint, completed', () => {
     const issue = makeIssue();
     issue.fields.status = {
       name: 'Done',

@@ -78,7 +78,7 @@ function issueSprintReport(issue, sprint) {
   let storyPointsWhenAdded;
 
   let finalStoryPoints = storyPoints;
-  let finalLastSprintId = sprintId;
+  let finalSprintId = sprintId;
   let finalStatus = issue.fields.status.name;
 
   let addedDuringSprint = false;
@@ -101,11 +101,10 @@ function issueSprintReport(issue, sprint) {
         sprintId = lastSprintIdFromSprintString(item.from);
 
         if (historyTime > completeTime) {
-          finalLastSprintId = sprintId;
+          finalSprintId = sprintId;
         } else {
           const lastToSprintId = lastSprintIdFromSprintString(item.to);
           if (lastToSprintId === sprint.id) {
-            sprintId = lastToSprintId;
             storyPointsWhenAdded = storyPoints;
             addedDuringSprint = true;
           }
@@ -118,14 +117,16 @@ function issueSprintReport(issue, sprint) {
     }
   }
 
-  if (sprintId !== sprint.id && finalLastSprintId !== sprint.id && !addedDuringSprint) {
+  if (sprintId === sprint.id) {
+    addedDuringSprint = false;
+  } else if (finalSprintId !== sprint.id && !addedDuringSprint) {
     return { outcome: 'NOT_RELEVANT' };
   }
 
-  let outcome = 'NOT_COMPLETED';
-  if (finalStatus === 'Done' && finalLastSprintId === sprint.id) {
-    outcome = 'COMPLETED';
-  } else if (sprintId !== finalLastSprintId) {
+  let outcome;
+  if (finalSprintId === sprint.id) {
+    outcome = finalStatus === 'Done' ? 'COMPLETED' : 'NOT_COMPLETED';
+  } else {
     outcome = 'PUNTED';
   }
 

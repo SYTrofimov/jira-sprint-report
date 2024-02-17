@@ -155,7 +155,7 @@ function sprintIdsFromSprintString(sprintString) {
 }
 
 /**
- * Determine the issues from the given issues that were removed from active sprints.
+ * Determine the issues that were removed from active sprints.
  * Issue changelog is expected to be sorted by created date in descending order.
  * @param {Array<Object>} issues - Array of Issue objects from the Jira Get Sprint Issues API call,
  * including changelog

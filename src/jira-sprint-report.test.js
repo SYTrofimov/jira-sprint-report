@@ -371,6 +371,17 @@ describe('jiraSprintReport', () => {
   });
 });
 
+test('finalEstimate when sprint complete, even when removed', () => {
+  const issue = makeIssue();
+  issue.fields.customfield_sprint = [];
+  addSprintChange(issue, SPRINT1.id, '', DURING_SPRINT1);
+  addStoryPointChange(issue, 3, 5, DURING_SPRINT1_2);
+
+  const result = issueSprintReport(issue, SPRINT1);
+  expect(result.outcome).toBe('PUNTED');
+  expect(result.finalEstimate).toBe(5);
+});
+
 const SPRINTS_BY_ID = new Map([
   [SPRINT1.id, SPRINT1],
   [SPRINT2.id, SPRINT2],

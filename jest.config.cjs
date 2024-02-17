@@ -4,4 +4,5 @@ module.exports = {
   transform: {},
   collectCoverage: true,
   coverageReporters: ['text', 'html'],
+  watchPathIgnorePatterns: ['/node_modules/', '/data/', '/scripts/'],
 };

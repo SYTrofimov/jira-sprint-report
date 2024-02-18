@@ -203,6 +203,51 @@ function issueDeltaCompleted(issueSprintReport) {
     : issueSprintReport.finalEstimate;
 }
 
+function sprintIdsFromSprintField(sprintField) {
+  const sprintIds = [];
+
+  for (let sprint of sprintField) {
+    sprintIds.push(sprint.id);
+  }
+
+  return sprintIds;
+}
+
+function issuesBySprintId(issues) {
+  const issuesBySprintIdMap = new Map();
+  for (const issue of issues) {
+    const sprintIds = sprintIdsFromSprintField(issue.fields[CUSTOM_FIELDS.sprint]);
+
+    const sprintIssues = new Set();
+    for (const sprintId of sprintIds) {
+      if (!issuesBySprintIdMap.has(sprintId)) {
+        issuesBySprintIdMap.set(sprintId, new Set());
+      }
+      const sprintIssues = issuesBySprintIdMap.get(sprintId);
+      sprintIssues.add(issue);
+    }
+  }
+  return issuesBySprintIdMap;
+}
+
+function sprintsById(sprints) {
+  const sprintsByIdMap = new Map();
+  for (const sprint of sprints) {
+    sprintsByIdMap.set(sprint.id, sprint);
+  }
+  return sprintsByIdMap;
+}
+
+function mergeSet2Into1(set1, set2) {
+  const mergedSet = new Set(set1);
+
+  for (const item of set2) {
+    mergedSet.add(item);
+  }
+
+  return mergedSet;
+}
+
 /**
  * Calculate velocity report.
  * @param {Array<Object>} issues - An array of issue updated since the start of the first sprint in sprints,
@@ -216,15 +261,30 @@ function issueDeltaCompleted(issueSprintReport) {
  * @throws {Error} if required fields are missing (not all missing fields are handled explicitly)
  */
 function velocityReport(issues, sprints) {
+  const issuesBySprintIdMap = issuesBySprintId(issues);
+  const sprintsByIdMap = sprintsById(sprints);
+  const removedIssuesBySprintIdMap = removedIssuesBySprintId(issues, sprintsByIdMap);
+
   const reports = [];
 
-  const report = {
-    planned: 0,
-    completed: 0,
-  };
-
   for (const sprint of sprints) {
-    reports.push(report);
+    let planned = 0;
+    let completed = 0;
+
+    const sprintIssuesSet = issuesBySprintIdMap.get(sprint.id) || new Set();
+    const removedIssuesSet = removedIssuesBySprintIdMap.get(sprint.id) || new Set();
+    const issuesSet = mergeSet2Into1(sprintIssuesSet, removedIssuesSet);
+
+    for (const issue of issuesSet) {
+      const result = issueSprintReport(issue, sprint);
+      planned += issueDeltaPlanned(result);
+      completed += issueDeltaCompleted(result);
+    }
+
+    reports.push({
+      planned: planned,
+      completed: completed,
+    });
   }
 
   return reports;

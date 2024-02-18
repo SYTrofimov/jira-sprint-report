@@ -538,17 +538,23 @@ describe('issueDeltas', () => {
 
 const SPRINTS = [SPRINT1, SPRINT2];
 
-describe.skip('velocityReport', () => {
+describe('velocityReport', () => {
   test('No sprints', () => {
-    const issues = [makeIssue(), makeIssue()];
+    const issue1 = makeIssue();
+    const issue2 = makeIssue();
+    issue2.key = 'KEY-2';
 
-    const report = velocityReport(issues, []);
+    const report = velocityReport([issue1, issue2], []);
     expect(report).toEqual([]);
   });
 
   test('No issues', () => {
-    const report = velocityReport([], [SPRINT1]);
+    const report = velocityReport([], SPRINTS);
     expect(report).toEqual([
+      {
+        planned: 0,
+        completed: 0,
+      },
       {
         planned: 0,
         completed: 0,
@@ -558,11 +564,14 @@ describe.skip('velocityReport', () => {
 
   test('Issues COMPLETED in SPRINT1', () => {
     const issue1 = makeIssue();
+    issue1.fields.status.name = 'Done';
     addStatusChange(issue1, 'To Do', 'Done', DURING_SPRINT1);
     const issue2 = makeIssue();
+    issue2.key = 'KEY-2';
+    issue2.fields.status.name = 'Done';
     addStatusChange(issue2, 'To Do', 'Done', DURING_SPRINT1_2);
 
-    const report = velocityReport([], [SPRINT1]);
+    const report = velocityReport([issue1, issue2], SPRINTS);
 
     expect(report).toEqual([
       {

@@ -6,6 +6,9 @@ import {
   initCustomFields,
   issueSprintReport,
   removedIssuesBySprintId,
+  issueDeltaPlanned,
+  issueDeltaCompleted,
+  velocityReport,
 } from './jira-sprint-report.js';
 
 beforeAll(() => {
@@ -146,7 +149,7 @@ function addDummyChange(issue) {
   });
 }
 
-describe('jiraSprintReport input validation', () => {
+describe('issueSprintReport', () => {
   test('Issue is undefined', () => {
     expect(() => issueSprintReport(undefined, SPRINT1)).toThrow('issue is undefined');
   });
@@ -171,9 +174,7 @@ describe('jiraSprintReport input validation', () => {
 
     expect(() => issueSprintReport(issue, SPRINT1)).toThrow('Missing');
   });
-});
 
-describe('jiraSprintReport', () => {
   test('Issue not relevant for sprint, never in sprint', () => {
     const issue = makeIssue();
     issue.fields.customfield_sprint = [];
@@ -369,17 +370,17 @@ describe('jiraSprintReport', () => {
     const result = issueSprintReport(issue, SPRINT1);
     expect(result.initialEstimate).toBe(5);
   });
-});
 
-test('finalEstimate when sprint complete, even when removed', () => {
-  const issue = makeIssue();
-  issue.fields.customfield_sprint = [];
-  addSprintChange(issue, SPRINT1.id, '', DURING_SPRINT1);
-  addStoryPointChange(issue, 3, 5, DURING_SPRINT1_2);
+  test('finalEstimate when sprint complete, even when removed', () => {
+    const issue = makeIssue();
+    issue.fields.customfield_sprint = [];
+    addSprintChange(issue, SPRINT1.id, '', DURING_SPRINT1);
+    addStoryPointChange(issue, 3, 5, DURING_SPRINT1_2);
 
-  const result = issueSprintReport(issue, SPRINT1);
-  expect(result.outcome).toBe('PUNTED');
-  expect(result.finalEstimate).toBe(5);
+    const result = issueSprintReport(issue, SPRINT1);
+    expect(result.outcome).toBe('PUNTED');
+    expect(result.finalEstimate).toBe(5);
+  });
 });
 
 const SPRINTS_BY_ID = new Map([
@@ -468,5 +469,110 @@ describe('issueRemovedFromSprints', () => {
     const issuesBySprintId = removedIssuesBySprintId(issues, SPRINTS_BY_ID);
 
     expect(issuesBySprintId.size).toBe(0);
+  });
+});
+
+describe('issueDeltas', () => {
+  test('Issue NOT_RELEVANT', () => {
+    const issueSprintReport = {
+      outcome: 'NOT_RELEVANT',
+    };
+    expect(issueDeltaPlanned(issueSprintReport)).toBe(0);
+    expect(issueDeltaCompleted(issueSprintReport)).toBe(0);
+  });
+
+  test('Planned, when there from the start', () => {
+    const issueSprintReport = {
+      outcome: undefined,
+      initialEstimate: 3,
+      addedDuringSprint: false,
+    };
+    expect(issueDeltaPlanned(issueSprintReport)).toBe(3);
+  });
+
+  test('Planned, when added during sprint', () => {
+    const issueSprintReport = {
+      outcome: undefined,
+      initialEstimate: 3,
+      addedDuringSprint: true,
+    };
+    expect(issueDeltaPlanned(issueSprintReport)).toBe(0);
+  });
+
+  test('Completed, when issue NOT_COMPLETED', () => {
+    const issueSprintReport = {
+      outcome: 'NOT_COMPLETED',
+    };
+    expect(issueDeltaCompleted(issueSprintReport)).toBe(0);
+  });
+
+  test('Completed, when issue PUNTED', () => {
+    const issueSprintReport = {
+      outcome: 'PUNTED',
+    };
+    expect(issueDeltaCompleted(issueSprintReport)).toBe(0);
+  });
+
+  test('Completed, when issue COMPLETED', () => {
+    const issueSprintReport = {
+      outcome: 'COMPLETED',
+      finalEstimate: 5,
+    };
+    expect(issueDeltaCompleted(issueSprintReport)).toBe(5);
+  });
+
+  test('Completed, when issue NOT_COMPLETED', () => {
+    const issueSprintReport = {
+      outcome: 'NOT_COMPLETED',
+    };
+    expect(issueDeltaCompleted(issueSprintReport)).toBe(0);
+  });
+
+  test('Completed, when issue PUNTED', () => {
+    const issueSprintReport = {
+      outcome: 'PUNTED',
+    };
+    expect(issueDeltaCompleted(issueSprintReport)).toBe(0);
+  });
+});
+
+const SPRINTS = [SPRINT1, SPRINT2];
+
+describe.skip('velocityReport', () => {
+  test('No sprints', () => {
+    const issues = [makeIssue(), makeIssue()];
+
+    const report = velocityReport(issues, []);
+    expect(report).toEqual([]);
+  });
+
+  test('No issues', () => {
+    const report = velocityReport([], [SPRINT1]);
+    expect(report).toEqual([
+      {
+        planned: 0,
+        completed: 0,
+      },
+    ]);
+  });
+
+  test('Issues COMPLETED in SPRINT1', () => {
+    const issue1 = makeIssue();
+    addStatusChange(issue1, 'To Do', 'Done', DURING_SPRINT1);
+    const issue2 = makeIssue();
+    addStatusChange(issue2, 'To Do', 'Done', DURING_SPRINT1_2);
+
+    const report = velocityReport([], [SPRINT1]);
+
+    expect(report).toEqual([
+      {
+        planned: 10,
+        completed: 10,
+      },
+      {
+        planned: 0,
+        completed: 0,
+      },
+    ]);
   });
 });

@@ -4,13 +4,13 @@
 let CUSTOM_FIELDS = {};
 
 /**
- * Initialize custom fields
+ * Initialize custom fields.
  * @param {Object} customFields - Custom fields from Jira Get Custom Fields API in the following format:
  * {
  *   storyPoints: 'customfield_10001',
  *   sprint: 'customfield_10002',
- * }
- * @throws {Error} if customFields does not have required fields
+ * }.
+ * @throws {Error} if customFields does not have required fields.
  */
 function initCustomFields(customFields) {
   if (!customFields.storyPoints) {
@@ -27,7 +27,6 @@ function lastSprintIdFromSprintField(sprintField) {
   if (!sprintField || sprintField.length === 0) {
     return null;
   }
-
   return sprintField[sprintField.length - 1].id;
 }
 
@@ -35,7 +34,6 @@ function lastSprintIdFromSprintString(sprintString) {
   if (!sprintString) {
     return null;
   }
-
   const chunks = sprintString.split(/, |,/);
   return parseInt(chunks[chunks.length - 1]);
 }
@@ -43,16 +41,16 @@ function lastSprintIdFromSprintString(sprintString) {
 /**
  * Determine the relationship of an issue with respect to a given sprint for a sprint report.
  * Sprint must be closed. Issue changelog is expected to be sorted by created date in descending order.
- * @param {Object} issue - Issue object from Jira Get Sprint Issues API, including changelog
- * @param {Object} sprint - Sprint object from Jira Get Sprint API
+ * @param {Object} issue - Issue object from Jira Get Sprint Issues API, including changelog.
+ * @param {Object} sprint - Sprint object from Jira Get Sprint API.
  * @returns {Object} - An object in the following format:
  * {
  *   outcome 'COMPLETED' | 'NOT_COMPLETED' | 'PUNTED' | 'NOT_RELEVANT',
  *   initialEstimate: float,
  *   finalEstimate: float,
  *   addedDuringSprint: boolean,
- * }
- * @throws {Error} if required fields are missing (not all missing fields are handled explicitly)
+ * }.
+ * @throws {Error} if required fields are missing (not all missing fields are handled explicitly).
  */
 function issueSprintReport(issue, sprint) {
   if (issue === undefined) {
@@ -158,11 +156,11 @@ function sprintIdsFromSprintString(sprintString) {
  * Determine the issues that were removed from active sprints.
  * Issue changelog is expected to be sorted by created date in descending order.
  * @param {Array<Object>} issues - Array of Issue objects from the Jira Get Sprint Issues API call,
- * including changelog
+ * including changelog.
  * @param {Map<Number, Object>} sprintsById - A map from sprint Id to Sprint objects from the Jira
- * Get Sprint API call
+ * Get Sprint API call.
  * @returns {Map<Number, Set<Object>>} - A Map from SprintIds to a Set of Issues.
- * @throws {Error} if required fields are missing (not all missing fields are handled explicitly)
+ * @throws {Error} if required fields are missing (not all missing fields are handled explicitly).
  */
 function removedIssuesBySprintId(issues, sprintsById) {
   const removedIssuesBySprintIdMap = new Map();
@@ -193,4 +191,50 @@ function removedIssuesBySprintId(issues, sprintsById) {
   return removedIssuesBySprintIdMap;
 }
 
-export { initCustomFields, issueSprintReport, removedIssuesBySprintId };
+function issueDeltaPlanned(issueSprintReport) {
+  return issueSprintReport.outcome === 'NOT_RELEVANT' || issueSprintReport.addedDuringSprint
+    ? 0
+    : issueSprintReport.initialEstimate;
+}
+
+function issueDeltaCompleted(issueSprintReport) {
+  return issueSprintReport.outcome === 'NOT_RELEVANT' || issueSprintReport.outcome !== 'COMPLETED'
+    ? 0
+    : issueSprintReport.finalEstimate;
+}
+
+/**
+ * Calculate velocity report.
+ * @param {Array<Object>} issues - An array of issue updated since the start of the first sprint in sprints,
+ * as obtainedrom the Jira Get Board Issues API call, including changelog.
+ * @param {Array<Object>} sprints - An array of Sprint objects from the Jira Get Board Sprints API call.
+ * @returns {Object} - An object in the following format:
+ * {
+ *   planned: float,
+ *   completed: float,
+ * }.
+ * @throws {Error} if required fields are missing (not all missing fields are handled explicitly)
+ */
+function velocityReport(issues, sprints) {
+  const reports = [];
+
+  const report = {
+    planned: 0,
+    completed: 0,
+  };
+
+  for (const sprint of sprints) {
+    reports.push(report);
+  }
+
+  return reports;
+}
+
+export {
+  initCustomFields,
+  issueSprintReport,
+  removedIssuesBySprintId,
+  issueDeltaPlanned,
+  issueDeltaCompleted,
+  velocityReport,
+};

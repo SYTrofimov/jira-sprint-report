@@ -238,7 +238,7 @@ function sprintsById(sprints) {
   return sprintsByIdMap;
 }
 
-function mergeSet2Into1(set1, set2) {
+function mergeSets(set1, set2) {
   const mergedSet = new Set(set1);
 
   for (const item of set2) {
@@ -273,7 +273,7 @@ function velocityReport(issues, sprints) {
 
     const sprintIssuesSet = issuesBySprintIdMap.get(sprint.id) || new Set();
     const removedIssuesSet = removedIssuesBySprintIdMap.get(sprint.id) || new Set();
-    const issuesSet = mergeSet2Into1(sprintIssuesSet, removedIssuesSet);
+    const issuesSet = mergeSets(sprintIssuesSet, removedIssuesSet);
 
     for (const issue of issuesSet) {
       const result = issueSprintReport(issue, sprint);

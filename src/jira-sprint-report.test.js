@@ -481,7 +481,7 @@ describe('issueDeltas', () => {
     expect(issueDeltaCompleted(issueSprintReport)).toBe(0);
   });
 
-  test('Planned, when there from the start', () => {
+  test('Planned value, when there from the start', () => {
     const issueSprintReport = {
       outcome: undefined,
       initialEstimate: 3,
@@ -490,7 +490,7 @@ describe('issueDeltas', () => {
     expect(issueDeltaPlanned(issueSprintReport)).toBe(3);
   });
 
-  test('Planned, when added during sprint', () => {
+  test('Planned value, when added during sprint', () => {
     const issueSprintReport = {
       outcome: undefined,
       initialEstimate: 3,
@@ -499,21 +499,21 @@ describe('issueDeltas', () => {
     expect(issueDeltaPlanned(issueSprintReport)).toBe(0);
   });
 
-  test('Completed, when issue NOT_COMPLETED', () => {
+  test('Completed value, when issue NOT_COMPLETED', () => {
     const issueSprintReport = {
       outcome: 'NOT_COMPLETED',
     };
     expect(issueDeltaCompleted(issueSprintReport)).toBe(0);
   });
 
-  test('Completed, when issue PUNTED', () => {
+  test('Completed value, when issue PUNTED', () => {
     const issueSprintReport = {
       outcome: 'PUNTED',
     };
     expect(issueDeltaCompleted(issueSprintReport)).toBe(0);
   });
 
-  test('Completed, when issue COMPLETED', () => {
+  test('Completed value, when issue COMPLETED', () => {
     const issueSprintReport = {
       outcome: 'COMPLETED',
       finalEstimate: 5,
@@ -521,14 +521,14 @@ describe('issueDeltas', () => {
     expect(issueDeltaCompleted(issueSprintReport)).toBe(5);
   });
 
-  test('Completed, when issue NOT_COMPLETED', () => {
+  test('Completed value, when issue NOT_COMPLETED', () => {
     const issueSprintReport = {
       outcome: 'NOT_COMPLETED',
     };
     expect(issueDeltaCompleted(issueSprintReport)).toBe(0);
   });
 
-  test('Completed, when issue PUNTED', () => {
+  test('Completed value, when issue PUNTED', () => {
     const issueSprintReport = {
       outcome: 'PUNTED',
     };

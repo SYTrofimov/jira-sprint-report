@@ -192,13 +192,17 @@ function removedIssuesBySprintId(issues, sprintsById) {
 }
 
 function issueDeltaPlanned(issueSprintReport) {
-  return issueSprintReport.outcome === 'NOT_RELEVANT' || issueSprintReport.addedDuringSprint
+  return issueSprintReport.outcome === 'NOT_RELEVANT' ||
+    issueSprintReport.addedDuringSprint ||
+    issueSprintReport.initialEstimate === null
     ? 0
     : issueSprintReport.initialEstimate;
 }
 
 function issueDeltaCompleted(issueSprintReport) {
-  return issueSprintReport.outcome === 'NOT_RELEVANT' || issueSprintReport.outcome !== 'COMPLETED'
+  return issueSprintReport.outcome === 'NOT_RELEVANT' ||
+    issueSprintReport.outcome !== 'COMPLETED' ||
+    issueSprintReport.finalEstimate === null
     ? 0
     : issueSprintReport.finalEstimate;
 }

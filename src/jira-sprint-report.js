@@ -210,6 +210,10 @@ function issueDeltaCompleted(issueSprintReport) {
 function sprintIdsFromSprintField(sprintField) {
   const sprintIds = [];
 
+  if (!sprintField) {
+    return sprintIds;
+  }
+
   for (let sprint of sprintField) {
     sprintIds.push(sprint.id);
   }

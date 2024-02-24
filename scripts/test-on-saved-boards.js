@@ -7,6 +7,7 @@ import {
   initCustomFields,
   issueSprintReport,
   removedIssuesBySprintId,
+  velocityReport,
 } from '../src/jira-sprint-report.js';
 
 async function testOnSavedBoards() {
@@ -31,10 +32,43 @@ async function testOnSavedBoard(board) {
   const updatedIssues = JSON.parse(fs.readFileSync(boardPath + '/updated-issues.json', 'utf8'));
   console.log(`Loaded ${updatedIssues.length} updated issues`);
 
+  const velocity = JSON.parse(fs.readFileSync(boardPath + '/velocity.json', 'utf8'));
+  console.log('Loaded GreenHopper velocity report');
+
+  testVelocityReport(velocity, updatedIssues, sprints);
+
   const removedIssuesBySprintIdMap = removedIssuesBySprintId(updatedIssues, sprintsById);
 
   for (const sprint of sprints) {
     await testOnSavedSprint(board, sprint, removedIssuesBySprintIdMap.get(sprint.id) || new Set());
+  }
+}
+
+function testVelocityReport(jiraVelocityReport, issues, sprints) {
+  console.log('Testing against Greenhopper velocity report');
+
+  const ourVelocityReport = velocityReport(issues, sprints);
+
+  for (let i = 0; i < sprints.length; i++) {
+    if (sprints[i].state !== 'closed') {
+      continue;
+    }
+
+    const jiraStats = jiraVelocityReport.velocityStatEntries[sprints[i].id];
+    const ourStats = ourVelocityReport[i];
+
+    console.log(`Testing sprint ${sprints[i].id} - ${sprints[i].name}`);
+
+    if (jiraStats.estimated.value !== ourStats.planned) {
+      console.error('\x1b[31mResults do not match!\x1b[0m');
+      console.error('Jira sprint report:', jiraStats.estimated.value);
+      console.error('Our sprint report:', ourStats.planned);
+    }
+    if (jiraStats.completed.value !== ourStats.completed) {
+      console.error('\x1b[31mResults do not match!\x1b[0m');
+      console.error('Jira sprint report:', jiraStats.completed.value);
+      console.error('Our sprint report:', ourStats.completed);
+    }
   }
 }
 

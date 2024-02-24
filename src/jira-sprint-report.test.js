@@ -541,13 +541,19 @@ describe('issueDeltas', () => {
 
 const SPRINTS = [SPRINT1, SPRINT2];
 
+function makeIssues() {
+  const issue1 = makeIssue();
+  issue1.fields.customfield_storyPoints = 3;
+  const issue2 = makeIssue();
+  issue2.key = 'KEY-2';
+
+  return [issue1, issue2];
+}
+
 describe('velocityReport', () => {
   test('No sprints', () => {
-    const issue1 = makeIssue();
-    const issue2 = makeIssue();
-    issue2.key = 'KEY-2';
-
-    const report = velocityReport([issue1, issue2], []);
+    const issues = makeIssues();
+    const report = velocityReport(issues, []);
     expect(report).toEqual([]);
   });
 
@@ -565,24 +571,72 @@ describe('velocityReport', () => {
     ]);
   });
 
-  test('Issues COMPLETED in SPRINT1', () => {
-    const issue1 = makeIssue();
-    issue1.fields.status.name = 'Done';
-    addStatusChange(issue1, 'To Do', 'Done', DURING_SPRINT1);
-    const issue2 = makeIssue();
-    issue2.key = 'KEY-2';
-    issue2.fields.status.name = 'Done';
-    addStatusChange(issue2, 'To Do', 'Done', DURING_SPRINT1_2);
+  test('Issues COMPLETED in SPRINT1, 2nd added', () => {
+    const issues = makeIssues();
+    issues[0].fields.status.name = 'Done';
+    addStatusChange(issues[0], 'To Do', 'Done', DURING_SPRINT1);
+    issues[1].fields.status.name = 'Done';
+    addSprintChange(issues[1], '', SPRINT1.id, DURING_SPRINT1_2);
+    addStatusChange(issues[1], 'To Do', 'Done', DURING_SPRINT1_3);
 
-    const report = velocityReport([issue1, issue2], SPRINTS);
+    const report = velocityReport(issues, SPRINTS);
 
     expect(report).toEqual([
       {
-        planned: 10,
-        completed: 10,
+        planned: 3,
+        completed: 8,
       },
       {
         planned: 0,
+        completed: 0,
+      },
+    ]);
+  });
+
+  test('1st issue COMPLETED in SPRINT1, 2nd in SPRINT2', () => {
+    const issues = makeIssues();
+    issues[0].fields.status.name = 'Done';
+    addStatusChange(issues[0], 'To Do', 'Done', DURING_SPRINT1);
+    issues[1].fields.status.name = 'Done';
+    issues[1].fields.customfield_sprint.push(SPRINT2);
+    addSprintChange(
+      issues[1],
+      SPRINT1.id,
+      `${SPRINT1.id}, ${SPRINT2.id}`,
+      JUST_AFTER_SPRINT1_COMPLETE,
+    );
+    addStatusChange(issues[1], 'To Do', 'Done', DURING_SPRINT2);
+
+    const report = velocityReport(issues, SPRINTS);
+
+    expect(report).toEqual([
+      {
+        planned: 8,
+        completed: 3,
+      },
+      {
+        planned: 5,
+        completed: 5,
+      },
+    ]);
+  });
+
+  test('1st issue COMPLETED in SPRINT1, 2nd removed from SPRINT1, never completed', () => {
+    const issues = makeIssues();
+    issues[0].fields.status.name = 'Done';
+    addStatusChange(issues[0], 'To Do', 'Done', DURING_SPRINT1);
+    issues[1].fields.customfield_sprint = [SPRINT2];
+    addSprintChange(issues[1], SPRINT1.id, SPRINT2.id, DURING_SPRINT1_2);
+
+    const report = velocityReport(issues, SPRINTS);
+
+    expect(report).toEqual([
+      {
+        planned: 8,
+        completed: 3,
+      },
+      {
+        planned: 5,
         completed: 0,
       },
     ]);

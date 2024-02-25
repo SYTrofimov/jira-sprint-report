@@ -22,6 +22,7 @@ async function saveBoard(board) {
   }
 
   const sprints = await jiraGetItems(`rest/agile/1.0/board/${board.id}/sprint`);
+  cleanSprints(sprints);
   fs.writeFileSync(boardPath + '/sprints.json', JSON.stringify(sprints, null, 2));
   console.log(`Saved ${sprints.length} board sprints`);
 
@@ -39,6 +40,7 @@ async function saveBoard(board) {
     url += `&jql=updated>="${sprints[0].startDate.substring(0, 10)}"`;
   }
   const updatedIssues = await jiraGetItems(url, 'issues');
+  cleanIssues(updatedIssues);
   fs.writeFileSync(boardPath + '/updated-issues.json', JSON.stringify(updatedIssues, null, 2));
   console.log(`Saved ${updatedIssues.length} updated issues`);
 
@@ -58,6 +60,7 @@ async function saveSprint(board, sprint) {
       `&expand=changelog`,
     'issues',
   );
+  cleanIssues(issues);
   fs.writeFileSync(sprintPathPrefix + 'sprint-issues.json', JSON.stringify(issues, null, 2));
   console.log(`Saved ${issues.length} issues`);
 
@@ -66,6 +69,54 @@ async function saveSprint(board, sprint) {
   );
   fs.writeFileSync(sprintPathPrefix + 'sprintreport.json', JSON.stringify(sprintReport, null, 2));
   console.log('Saved GreenHopper sprint report');
+}
+
+function cleanSprints(sprints) {
+  const allowedProperties = ['id', 'state', 'name', 'startDate', 'completeDate'];
+
+  for (const sprint of sprints) {
+    for (const key of Object.keys(sprint)) {
+      if (!allowedProperties.includes(key)) {
+        delete sprint[key];
+      }
+    }
+  }
+}
+
+function cleanIssues(issues) {
+  const allowedProperties = ['key', 'changelog', 'fields'];
+  const allowedFields = ['status', CUSTOM_FIELDS.sprint, CUSTOM_FIELDS.storyPoints];
+
+  for (const issue of issues) {
+    for (const key of Object.keys(issue)) {
+      if (allowedProperties.includes(key)) {
+        if (key === 'fields') {
+          for (const field of Object.keys(issue[key])) {
+            if (!allowedFields.includes(field)) {
+              delete issue[key][field];
+            }
+          }
+        } else if (key === 'changelog') {
+          for (const history of issue[key].histories) {
+            for (const key of Object.keys(history)) {
+              if (key === 'items') {
+                for (const item of history[key]) {
+                  if (!allowedFields.includes(item.fieldId)) {
+                    const index = history[key].indexOf(item);
+                    history[key].splice(index, 1);
+                  }
+                }
+              } else if (key !== 'created') {
+                delete history[key];
+              }
+            }
+          }
+        }
+      } else {
+        delete issue[key];
+      }
+    }
+  }
 }
 
 await saveListedBoards();

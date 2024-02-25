@@ -2,17 +2,19 @@
 // @ts-check
 
 const CUSTOM_FIELDS = {};
+const DONE_STATUSES = new Set();
 
 /**
- * Initialize custom fields.
+ * Initialize sprint report.
  * @param {Object} customFields - Custom fields from Jira Get Custom Fields API in the following format:
  * {
  *   storyPoints: 'customfield_10001',
  *   sprint: 'customfield_10002',
  * }.
+ * @param {Object} doneStatuses - Arrray of 'done' status strings.
  * @throws {Error} if customFields does not have required fields.
  */
-function initCustomFields(customFields) {
+function initSprintReport(customFields, doneStatuses) {
   if (!customFields.storyPoints) {
     throw new Error('Missing storyPoints field in customFields');
   }
@@ -22,6 +24,11 @@ function initCustomFields(customFields) {
 
   CUSTOM_FIELDS.storyPoints = customFields.storyPoints;
   CUSTOM_FIELDS.sprint = customFields.sprint;
+
+  DONE_STATUSES.clear();
+  for (const status of doneStatuses) {
+    DONE_STATUSES.add(status);
+  }
 }
 
 function lastSprintIdFromSprintField(sprintField) {
@@ -123,7 +130,7 @@ function issueSprintReport(issue, sprint) {
 
   let outcome;
   if (finalSprintId === sprint.id) {
-    outcome = finalStatus === 'Done' ? 'COMPLETED' : 'NOT_COMPLETED';
+    outcome = DONE_STATUSES.has(finalStatus) ? 'COMPLETED' : 'NOT_COMPLETED';
   } else {
     outcome = 'PUNTED';
   }
@@ -300,7 +307,7 @@ function velocityReport(issues, sprints) {
 }
 
 export {
-  initCustomFields,
+  initSprintReport,
   issueSprintReport,
   removedIssuesBySprintId,
   issueDeltaPlanned,

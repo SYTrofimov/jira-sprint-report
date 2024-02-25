@@ -4,7 +4,7 @@
 import fs from 'fs';
 
 import {
-  initCustomFields,
+  initSprintReport,
   issueSprintReport,
   removedIssuesBySprintId,
   velocityReport,
@@ -12,7 +12,7 @@ import {
 
 async function testOnSavedBoards() {
   const customFields = JSON.parse(fs.readFileSync('data/custom-fields.json', 'utf8'));
-  initCustomFields(customFields);
+  initSprintReport(customFields, ['Done']);
 
   const boards = JSON.parse(fs.readFileSync('data/boards.json', 'utf8'));
   for (const board of boards) {

@@ -3,7 +3,7 @@
 
 import { test, expect, describe, beforeAll } from '@jest/globals';
 import {
-  initCustomFields,
+  initSprintReport,
   issueSprintReport,
   removedIssuesBySprintId,
   issueDeltaPlanned,
@@ -12,19 +12,24 @@ import {
 } from './jira-sprint-report.js';
 
 beforeAll(() => {
-  initCustomFields({
-    storyPoints: 'customfield_storyPoints',
-    sprint: 'customfield_sprint',
-  });
+  initSprintReport(
+    {
+      storyPoints: 'customfield_storyPoints',
+      sprint: 'customfield_sprint',
+    },
+    ['Done', 'Closed'],
+  );
 });
 
-describe('initCustomFields', () => {
+describe('initSprintReport', () => {
   test('Missing storyPoints', () => {
-    expect(() => initCustomFields({ sprint: 'customfield_sprint' })).toThrow('Missing storyPoints');
+    expect(() => initSprintReport({ sprint: 'customfield_sprint' }, [])).toThrow(
+      'Missing storyPoints',
+    );
   });
 
   test('Missing sprint', () => {
-    expect(() => initCustomFields({ storyPoints: 'customfield_storyPoints' })).toThrow(
+    expect(() => initSprintReport({ storyPoints: 'customfield_storyPoints' }, [])).toThrow(
       'Missing sprint',
     );
   });
@@ -285,13 +290,26 @@ describe('issueSprintReport', () => {
     expect(result.outcome).toBe('NOT_COMPLETED');
   });
 
-  test('Issue was in the sprint from the start, completed', () => {
+  test('Issue was in the sprint from the start, completed as Done', () => {
     const issue = makeIssue();
     issue.fields.status = {
       name: 'Done',
     };
     addSprintChange(issue, '', SPRINT1.id, BEFORE_SPRINT1);
     addStatusChange(issue, 'To Do', 'Done', DURING_SPRINT1);
+
+    const result = issueSprintReport(issue, SPRINT1);
+    expect(result.outcome).toBe('COMPLETED');
+    expect(result.addedDuringSprint).toBe(false);
+  });
+
+  test('Issue was in the sprint from the start, completed as Closed', () => {
+    const issue = makeIssue();
+    issue.fields.status = {
+      name: 'Closed',
+    };
+    addSprintChange(issue, '', SPRINT1.id, BEFORE_SPRINT1);
+    addStatusChange(issue, 'Open', 'Closed', DURING_SPRINT1);
 
     const result = issueSprintReport(issue, SPRINT1);
     expect(result.outcome).toBe('COMPLETED');

@@ -1,7 +1,7 @@
 'use strict';
 // @ts-check
 
-let CUSTOM_FIELDS = {};
+const CUSTOM_FIELDS = {};
 
 /**
  * Initialize custom fields.
@@ -20,7 +20,8 @@ function initCustomFields(customFields) {
     throw new Error('Missing sprint field in customFields');
   }
 
-  CUSTOM_FIELDS = customFields;
+  CUSTOM_FIELDS.storyPoints = customFields.storyPoints;
+  CUSTOM_FIELDS.sprint = customFields.sprint;
 }
 
 function lastSprintIdFromSprintField(sprintField) {

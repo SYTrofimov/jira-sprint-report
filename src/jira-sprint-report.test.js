@@ -608,6 +608,23 @@ describe('velocityReport', () => {
     ]);
   });
 
+  test('Issue unrelated to sprint', () => {
+    const issues = makeIssues();
+    issues[0].fields.customfield_sprint = null;
+    issues[1].fields.customfield_sprint = null;
+    const report = velocityReport(issues, SPRINTS);
+    expect(report).toEqual([
+      {
+        planned: 0,
+        completed: 0,
+      },
+      {
+        planned: 0,
+        completed: 0,
+      },
+    ]);
+  });
+
   test('Issues COMPLETED in SPRINT1, 2nd added during sprint', () => {
     const issues = makeIssues();
     issues[0].fields.status.name = 'Done';

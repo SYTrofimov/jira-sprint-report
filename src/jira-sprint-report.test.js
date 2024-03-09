@@ -1,9 +1,10 @@
 'use strict';
 // @ts-check
 
-import { test, expect, describe, beforeAll } from '@jest/globals';
+import { test, expect, describe, beforeEach } from '@jest/globals';
 import {
   initSprintReport,
+  appearUninitialized,
   issueSprintReport,
   removedIssuesBySprintId,
   issueDeltaPlanned,
@@ -11,7 +12,7 @@ import {
   velocityReport,
 } from './jira-sprint-report.js';
 
-beforeAll(() => {
+beforeEach(() => {
   initSprintReport(
     {
       storyPoints: 'customfield_storyPoints',
@@ -155,6 +156,12 @@ function addDummyChange(issue) {
 }
 
 describe('issueSprintReport', () => {
+  test('Not initialized', () => {
+    appearUninitialized();
+    const issue = makeIssue();
+    expect(() => issueSprintReport(issue, SPRINT1)).toThrow('not initialized');
+  });
+
   test('Issue is undefined', () => {
     expect(() => issueSprintReport(undefined, SPRINT1)).toThrow('issue is undefined');
   });
@@ -407,6 +414,12 @@ const SPRINTS_BY_ID = new Map([
 ]);
 
 describe('issueRemovedFromSprints', () => {
+  test('Not initialized', () => {
+    appearUninitialized();
+    const issues = [makeIssue()];
+    expect(() => removedIssuesBySprintId(issues, SPRINTS_BY_ID)).toThrow('not initialized');
+  });
+
   test('No changes in changelog', () => {
     const issues = [makeIssue()];
 
@@ -569,6 +582,12 @@ function makeIssues() {
 }
 
 describe('velocityReport', () => {
+  test('Not initialized', () => {
+    appearUninitialized();
+    const issues = makeIssues();
+    expect(() => velocityReport(issues, SPRINTS)).toThrow('not initialized');
+  });
+
   test('No sprints', () => {
     const issues = makeIssues();
     const report = velocityReport(issues, []);

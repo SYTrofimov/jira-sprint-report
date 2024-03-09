@@ -1,6 +1,7 @@
 'use strict';
 // @ts-check
 
+let isInitialized = false;
 const CUSTOM_FIELDS = {};
 const DONE_STATUSES = new Set();
 
@@ -29,6 +30,12 @@ function initSprintReport(customFields, doneStatuses) {
   for (const status of doneStatuses) {
     DONE_STATUSES.add(status);
   }
+
+  isInitialized = true;
+}
+
+function appearUninitialized() {
+  isInitialized = false;
 }
 
 function lastSprintIdFromSprintField(sprintField) {
@@ -61,6 +68,9 @@ function lastSprintIdFromSprintString(sprintString) {
  * @throws {Error} if required fields are missing (not all missing fields are handled explicitly).
  */
 function issueSprintReport(issue, sprint) {
+  if (!isInitialized) {
+    throw new Error('jira-sprint-report not initialized. Call initSprintReport first.');
+  }
   if (issue === undefined) {
     throw new Error('issue is undefined');
   }
@@ -171,7 +181,12 @@ function sprintIdsFromSprintString(sprintString) {
  * @throws {Error} if required fields are missing (not all missing fields are handled explicitly).
  */
 function removedIssuesBySprintId(issues, sprintsById) {
+  if (!isInitialized) {
+    throw new Error('jira-sprint-report not initialized. Call initSprintReport first.');
+  }
+
   const removedIssuesBySprintIdMap = new Map();
+
   for (const issue of issues) {
     for (let history of issue.changelog.histories) {
       for (let item of history.items) {
@@ -196,6 +211,7 @@ function removedIssuesBySprintId(issues, sprintsById) {
       }
     }
   }
+
   return removedIssuesBySprintIdMap;
 }
 
@@ -308,6 +324,7 @@ function velocityReport(issues, sprints) {
 
 export {
   initSprintReport,
+  appearUninitialized,
   issueSprintReport,
   removedIssuesBySprintId,
   issueDeltaPlanned,

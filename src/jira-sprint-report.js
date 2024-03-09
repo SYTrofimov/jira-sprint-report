@@ -69,7 +69,7 @@ function lastSprintIdFromSprintString(sprintString) {
  */
 function issueSprintReport(issue, sprint) {
   if (!isInitialized) {
-    throw new Error('jira-sprint-report not initialized. Call initSprintReport first.');
+    throw new Error('jira-sprint-report not initialized. Call initSprintReport() first.');
   }
   if (issue === undefined) {
     throw new Error('issue is undefined');
@@ -182,7 +182,7 @@ function sprintIdsFromSprintString(sprintString) {
  */
 function removedIssuesBySprintId(issues, sprintsById) {
   if (!isInitialized) {
-    throw new Error('jira-sprint-report not initialized. Call initSprintReport first.');
+    throw new Error('jira-sprint-report not initialized. Call initSprintReport() first.');
   }
 
   const removedIssuesBySprintIdMap = new Map();

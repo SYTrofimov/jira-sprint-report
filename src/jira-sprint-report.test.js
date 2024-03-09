@@ -608,7 +608,7 @@ describe('velocityReport', () => {
     ]);
   });
 
-  test('Issues COMPLETED in SPRINT1, 2nd added', () => {
+  test('Issues COMPLETED in SPRINT1, 2nd added during sprint', () => {
     const issues = makeIssues();
     issues[0].fields.status.name = 'Done';
     addStatusChange(issues[0], 'To Do', 'Done', DURING_SPRINT1);

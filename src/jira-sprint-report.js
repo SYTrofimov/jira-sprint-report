@@ -196,6 +196,10 @@ function removedIssuesBySprintId(issues, sprintsById) {
           if (fromSprintId !== null && (!toSprintIds || !toSprintIds.has(fromSprintId))) {
             const sprint = sprintsById.get(fromSprintId);
 
+            if (!sprint) {
+              continue;
+            }
+
             const startTime = new Date(sprint.startDate);
             const completeTime = new Date(sprint.completeDate);
             const historyTime = new Date(history.created);

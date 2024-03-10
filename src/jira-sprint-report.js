@@ -1,7 +1,7 @@
 'use strict';
 // @ts-check
 
-let isInitialized = false;
+let INITIALIZED = false;
 const CUSTOM_FIELDS = {};
 const DONE_STATUSES = new Set();
 
@@ -31,11 +31,11 @@ function initSprintReport(customFields, doneStatuses) {
     DONE_STATUSES.add(status);
   }
 
-  isInitialized = true;
+  INITIALIZED = true;
 }
 
 function appearUninitialized() {
-  isInitialized = false;
+  INITIALIZED = false;
 }
 
 function lastSprintIdFromSprintField(sprintField) {
@@ -68,7 +68,7 @@ function lastSprintIdFromSprintString(sprintString) {
  * @throws {Error} if required fields are missing (not all missing fields are handled explicitly).
  */
 function issueSprintReport(issue, sprint) {
-  if (!isInitialized) {
+  if (!INITIALIZED) {
     throw new Error('jira-sprint-report not initialized. Call initSprintReport() first.');
   }
   if (issue === undefined) {
@@ -181,7 +181,7 @@ function sprintIdsFromSprintString(sprintString) {
  * @throws {Error} if required fields are missing (not all missing fields are handled explicitly).
  */
 function removedIssuesBySprintId(issues, sprintsById) {
-  if (!isInitialized) {
+  if (!INITIALIZED) {
     throw new Error('jira-sprint-report not initialized. Call initSprintReport() first.');
   }
 

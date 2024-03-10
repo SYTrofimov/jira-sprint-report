@@ -285,10 +285,10 @@ function mergeSets(set1, set2) {
  * @param {Array<Object>} issues - An array of issue updated since the start of the first sprint in sprints,
  * as obtainedrom the Jira Get Board Issues API call, including changelog.
  * @param {Array<Object>} sprints - An array of Sprint objects from the Jira Get Board Sprints API call.
- * @returns {Object} - An object in the following format:
+ * @returns {Array} - An array of objects corresponding to sprints in the following format:
  * {
- *   planned: float,
- *   completed: float,
+ *   planned: Number,
+ *   completed: Number,
  * }.
  * @throws {Error} if required fields are missing (not all missing fields are handled explicitly)
  */

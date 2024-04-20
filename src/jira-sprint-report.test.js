@@ -4,7 +4,8 @@
 import { test, expect, describe, beforeEach } from '@jest/globals';
 import {
   initSprintReport,
-  appearUninitialized,
+  uninitialize,
+  storyPointFieldValue,
   issueSprintReport,
   removedIssuesBySprintId,
   issueDeltaPlanned,
@@ -15,8 +16,9 @@ import {
 beforeEach(() => {
   initSprintReport(
     {
-      storyPoints: 'customfield_storyPoints',
       sprint: 'customfield_sprint',
+      storyPoints: 'customfield_storyPoints',
+      storyPointEstimate: 'customfield_storyPointEstimate',
     },
     ['Done', 'Closed'],
   );
@@ -24,14 +26,22 @@ beforeEach(() => {
 
 describe('initSprintReport', () => {
   test('Missing storyPoints', () => {
-    expect(() => initSprintReport({ sprint: 'customfield_sprint' }, [])).toThrow(
-      'Missing storyPoints',
-    );
+    expect(() => initSprintReport({ sprint: 'customfield_sprint' }, [])).toThrow('Missing Story');
   });
 
   test('Missing sprint', () => {
     expect(() => initSprintReport({ storyPoints: 'customfield_storyPoints' }, [])).toThrow(
-      'Missing sprint',
+      'Missing Sprint',
+    );
+  });
+
+  test('Does not throw with storyPointEstimate only', () => {
+    initSprintReport(
+      {
+        sprint: 'customfield_sprint',
+        storyPointEstimate: 'customfield_storyPointEstimate',
+      },
+      [],
     );
   });
 });
@@ -155,9 +165,44 @@ function addDummyChange(issue) {
   });
 }
 
+describe('storyPointFieldValue', () => {
+  test('Story Points custom field not initialized', () => {
+    const issue = makeIssue();
+    uninitialize();
+    expect(storyPointFieldValue(issue)).toBeUndefined();
+  });
+
+  test('No Story Points related custom fields in issue', () => {
+    const issue = makeIssue();
+    issue.fields.customfield_storyPoints = undefined;
+
+    expect(storyPointFieldValue(issue)).toBeUndefined();
+  });
+
+  test('Only Story Points', () => {
+    const issue = makeIssue();
+    expect(storyPointFieldValue(issue)).toBe(5);
+  });
+
+  test('Only Story Point Estimate', () => {
+    const issue = makeIssue();
+    issue.fields.customfield_storyPoints = undefined;
+    issue.fields.customfield_storyPointEstimate = 3;
+
+    expect(storyPointFieldValue(issue)).toBe(3);
+  });
+
+  test('Both Story Points and Story Point Estimate', () => {
+    const issue = makeIssue();
+    issue.fields.customfield_storyPointEstimate = 3;
+
+    expect(storyPointFieldValue(issue)).toBe(5);
+  });
+});
+
 describe('issueSprintReport', () => {
   test('Not initialized', () => {
-    appearUninitialized();
+    uninitialize();
     const issue = makeIssue();
     expect(() => issueSprintReport(issue, SPRINT1)).toThrow('not initialized');
   });
@@ -415,7 +460,7 @@ const SPRINTS_BY_ID = new Map([
 
 describe('issueRemovedFromSprints', () => {
   test('Not initialized', () => {
-    appearUninitialized();
+    uninitialize();
     const issues = [makeIssue()];
     expect(() => removedIssuesBySprintId(issues, SPRINTS_BY_ID)).toThrow('not initialized');
   });
@@ -596,7 +641,7 @@ function makeIssues() {
 
 describe('velocityReport', () => {
   test('Not initialized', () => {
-    appearUninitialized();
+    uninitialize();
     const issues = makeIssues();
     expect(() => velocityReport(issues, SPRINTS)).toThrow('not initialized');
   });

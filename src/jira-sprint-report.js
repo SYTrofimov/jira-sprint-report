@@ -9,22 +9,24 @@ const DONE_STATUSES = new Set();
  * Initialize sprint report.
  * @param {Object} customFields - Custom fields from Jira Get Custom Fields API in the following format:
  * {
- *   storyPoints: 'customfield_10001',
- *   sprint: 'customfield_10002',
+ *   sprint: 'customfield_10001',
+ *   storyPoints: 'customfield_10002',
+ *   storyPointEstimate: 'customfield_10003',
  * }.
  * @param {Object} doneStatuses - Arrray of 'done' status strings.
  * @throws {Error} if customFields does not have required fields.
  */
 function initSprintReport(customFields, doneStatuses) {
-  if (!customFields.storyPoints) {
-    throw new Error('Missing storyPoints field in customFields');
-  }
   if (!customFields.sprint) {
-    throw new Error('Missing sprint field in customFields');
+    throw new Error('Missing Sprint field in customFields');
+  }
+  if (!customFields.storyPoints && !customFields.storyPointEstimate) {
+    throw new Error('Missing Story Points and Story Point Estimate fields in customFields');
   }
 
-  CUSTOM_FIELDS.storyPoints = customFields.storyPoints;
   CUSTOM_FIELDS.sprint = customFields.sprint;
+  CUSTOM_FIELDS.storyPoints = customFields.storyPoints;
+  CUSTOM_FIELDS.storyPointEstimate = customFields.storyPointEstimate;
 
   DONE_STATUSES.clear();
   for (const status of doneStatuses) {
@@ -34,8 +36,32 @@ function initSprintReport(customFields, doneStatuses) {
   INITIALIZED = true;
 }
 
-function appearUninitialized() {
+function uninitialize() {
+  delete CUSTOM_FIELDS.sprint;
+  delete CUSTOM_FIELDS.storyPoints;
+  delete CUSTOM_FIELDS.storyPointEstimate;
+
+  DONE_STATUSES.clear();
+
   INITIALIZED = false;
+}
+
+function storyPointFieldValue(issue) {
+  let storyPoints;
+
+  if (CUSTOM_FIELDS.storyPoints) {
+    storyPoints = issue.fields[CUSTOM_FIELDS.storyPoints];
+  }
+
+  if (storyPoints === undefined && CUSTOM_FIELDS.storyPointEstimate) {
+    storyPoints = issue.fields[CUSTOM_FIELDS.storyPointEstimate];
+  }
+
+  return storyPoints;
+}
+
+function isStoryPointFieldId(fieldId) {
+  return fieldId === CUSTOM_FIELDS.storyPoints || fieldId === CUSTOM_FIELDS.storyPointEstimate;
 }
 
 function lastSprintIdFromSprintField(sprintField) {
@@ -77,8 +103,8 @@ function issueSprintReport(issue, sprint) {
   if (issue.fields[CUSTOM_FIELDS.sprint] === undefined) {
     throw new Error(`Missing Sprint custom field in issue ${issue.key}`);
   }
-  if (issue.fields[CUSTOM_FIELDS.storyPoints] === undefined) {
-    throw new Error(`Missing Story Points custom field in issue ${issue.key}`);
+  if (storyPointFieldValue(issue) === undefined) {
+    throw new Error(`Missing Story Point related custom fields in issue ${issue.key}`);
   }
   if (issue.changelog === undefined || issue.changelog.histories === undefined) {
     throw new Error(`Missing changelog.histories in issue ${issue.key}`);
@@ -87,7 +113,7 @@ function issueSprintReport(issue, sprint) {
   const startTime = new Date(sprint.startDate);
   const completeTime = new Date(sprint.completeDate);
 
-  let storyPoints = issue.fields[CUSTOM_FIELDS.storyPoints];
+  let storyPoints = storyPointFieldValue(issue);
   let sprintId = lastSprintIdFromSprintField(issue.fields[CUSTOM_FIELDS.sprint]);
 
   let storyPointsWhenAdded;
@@ -106,7 +132,7 @@ function issueSprintReport(issue, sprint) {
     }
 
     for (let item of history.items) {
-      if (item.fieldId === CUSTOM_FIELDS.storyPoints) {
+      if (isStoryPointFieldId(item.fieldId)) {
         storyPoints = item.fromString === null ? null : parseFloat(item.fromString);
 
         if (historyTime > completeTime) {
@@ -328,7 +354,8 @@ function velocityReport(issues, sprints) {
 
 export {
   initSprintReport,
-  appearUninitialized,
+  uninitialize,
+  storyPointFieldValue,
   issueSprintReport,
   removedIssuesBySprintId,
   issueDeltaPlanned,

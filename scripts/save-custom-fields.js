@@ -10,12 +10,13 @@ async function saveCustomFields() {
 
   let customFields = {};
 
-  const storyPointsFields = await jiraGetItems(
-    'rest/api/3/field/search?type=custom&query=Story Points',
-  );
+  const storyPointsFields = await jiraGetItems('rest/api/3/field/search?type=custom&query=Story');
   for (const field of storyPointsFields) {
     if (field.name === 'Story Points') {
       customFields.storyPoints = field.id;
+    }
+    if (field.name === 'Story point estimate') {
+      customFields.storyPointEstimate = field.id;
     }
   }
 

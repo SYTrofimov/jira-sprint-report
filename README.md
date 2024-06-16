@@ -12,26 +12,26 @@ git clone https://github.com/SYTrofimov/jira-sprint-report.git
 
 1. Import the functions explcitly. TODO: Create an nvm package.
 
-```JavaScript
-import {
-  initSprintReport,
-  velocityReport,
-} from '../../../jira-sprint-report/src/jira-sprint-report.js';
-```
+   ```JavaScript
+   import {
+     initSprintReport,
+     velocityReport,
+   } from '../../../jira-sprint-report/src/jira-sprint-report.js';
+   ```
 
 1. Configure the library.
 
-```JavaScript
-  initSprintReport(customFields, doneStatuses);
-```
+   ```JavaScript
+     initSprintReport(customFields, doneStatuses);
+   ```
 
 1. Fetch the updatedIssues and sprints from Jira API.
 
 1. Call velocityReport.
 
-```JavaScript
-const velocities = velocityReport(updatedIssues, sprints);
-```
+   ```JavaScript
+   const velocities = velocityReport(updatedIssues, sprints);
+   ```
 
 Look at the unit tests in `src/jira-sprint-report.test.js` and in the `scripts/` folder for  
 more usage examples.

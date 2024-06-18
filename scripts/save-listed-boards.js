@@ -5,6 +5,15 @@ import { jiraGet, jiraGetItems } from './utils.js';
 
 const CUSTOM_FIELDS = JSON.parse(fs.readFileSync('data/custom-fields.json', 'utf8'));
 
+let fields = `status,${CUSTOM_FIELDS.sprint}`;
+if (CUSTOM_FIELDS.storyPoints) {
+  fields += `,${CUSTOM_FIELDS.storyPoints}`;
+}
+if (CUSTOM_FIELDS.storyPointEstimate) {
+  fields += `,${CUSTOM_FIELDS.storyPointEstimate}`;
+}
+const FIELDS = fields;
+
 async function saveListedBoards() {
   const boards = JSON.parse(fs.readFileSync('data/boards.json', 'utf8'));
   for (const board of boards) {
@@ -32,10 +41,7 @@ async function saveBoard(board) {
   fs.writeFileSync(boardPath + '/velocity.json', JSON.stringify(velocity, null, 2));
   console.log('Saved GreenHopper velocity report');
 
-  let url =
-    `rest/agile/1.0/board/${board.id}/issue` +
-    `?fields=status,${CUSTOM_FIELDS.sprint},${CUSTOM_FIELDS.storyPoints}` +
-    `&expand=changelog`;
+  let url = `rest/agile/1.0/board/${board.id}/issue` + `?fields=${FIELDS}` + `&expand=changelog`;
   if (sprints.length > 0 && sprints[0].startDate !== undefined) {
     url += `&jql=updated>="${sprints[0].startDate.substring(0, 10)}"`;
   }
@@ -56,7 +62,7 @@ async function saveSprint(board, sprint) {
 
   const issues = await jiraGetItems(
     `rest/agile/1.0/board/${board.id}/sprint/${sprint.id}/issue` +
-      `?fields=status,${CUSTOM_FIELDS.sprint},${CUSTOM_FIELDS.storyPoints}` +
+      `?fields=${FIELDS}` +
       `&expand=changelog`,
     'issues',
   );
@@ -85,7 +91,12 @@ function cleanSprints(sprints) {
 
 function cleanIssues(issues) {
   const allowedProperties = ['key', 'changelog', 'fields'];
-  const allowedFields = ['status', CUSTOM_FIELDS.sprint, CUSTOM_FIELDS.storyPoints];
+  const allowedFields = [
+    'status',
+    CUSTOM_FIELDS.sprint,
+    CUSTOM_FIELDS.storyPoints,
+    CUSTOM_FIELDS.storyPointEstimate,
+  ];
 
   for (const issue of issues) {
     for (const key of Object.keys(issue)) {

@@ -55,10 +55,11 @@ The `scripts/` folder contains scripts for performing mass-validation, which is 
 
 ### Initial setup
 
+1. Go to the project root folder.
 1. Copy `.env.example` into `.env` and fill in the Jira credentials.
-1. Run `save-board-list.js` to save a list of all boards in the Jira instance to `data/boards.json`. Edit this file and remove any boards you don't want to use from it.
-1. Run `save-custom-fields.js` to save the custom fields configuration to `data/custom-fields.json`.
-1. Run `save-listed-boards.js` to dump the relevant sprint and issue data of all listed boards to the `data/` folder. This will take some time.
+1. Run `node scripts/save-board-list.js` to save a list of all boards in the Jira instance to `data/boards.json`. Edit this file and remove any boards you don't want to use from it.
+1. Run `node scripts/save-custom-fields.js` to save the custom fields configuration to `data/custom-fields.json`.
+1. Run `node scripts/save-listed-boards.js` to dump the relevant sprint and issue data of all listed boards to the `data/` folder. This will take some time.
 
 ### Validation
 

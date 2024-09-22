@@ -2,6 +2,7 @@
 // @ts-check
 
 import fs from 'fs';
+import process from 'process';
 
 import {
   initSprintReport,
@@ -10,17 +11,45 @@ import {
   velocityReport,
 } from '../src/jira-sprint-report.js';
 
+function parseCommandLineArgs() {
+  const args = process.argv.slice(2);
+  const parsedArgs = {};
+
+  for (let i = 0; i < args.length; i++) {
+    if (args[i].startsWith('--')) {
+      const key = args[i].slice(2);
+      const value = args[i + 1] && !args[i + 1].startsWith('--') ? args[i + 1] : true;
+      if (key === 'sprint') {
+        const sprintId = Number(value);
+        if (!Number.isInteger(sprintId) || sprintId <= 0) {
+          console.error('\x1b[31mError: Sprint ID must be a positive integer\x1b[0m');
+          process.exit(1);
+        }
+        parsedArgs[key] = sprintId;
+      } else {
+        parsedArgs[key] = value;
+      }
+      i++;
+    }
+  }
+
+  return parsedArgs;
+}
+
 async function testOnSavedBoards() {
   const customFields = JSON.parse(fs.readFileSync('data/custom-fields.json', 'utf8'));
   initSprintReport(customFields, ['Done']);
 
   const boards = JSON.parse(fs.readFileSync('data/boards.json', 'utf8'));
+
+  const args = parseCommandLineArgs();
+
   for (const board of boards) {
-    await testOnSavedBoard(board);
+    await testOnSavedBoard(board, args.sprint);
   }
 }
 
-async function testOnSavedBoard(board) {
+async function testOnSavedBoard(board, sprintId) {
   console.log(`Testing velocity on board ${board.id} - ${board.name}`);
 
   const boardPath = `data/board-${board.id}`;
@@ -35,11 +64,16 @@ async function testOnSavedBoard(board) {
   const velocity = JSON.parse(fs.readFileSync(boardPath + '/velocity.json', 'utf8'));
   console.log('Loaded GreenHopper velocity report');
 
-  testVelocityReport(velocity, updatedIssues, sprints);
+  if (!sprintId) {
+    testVelocityReport(velocity, updatedIssues, sprints);
+  }
 
   const removedIssuesBySprintIdMap = removedIssuesBySprintId(updatedIssues, sprintsById);
 
   for (const sprint of sprints) {
+    if (sprintId && sprint.id !== sprintId) {
+      continue; // Skip sprints that don't match the specified sprint ID
+    }
     await testOnSavedSprint(board, sprint, removedIssuesBySprintIdMap.get(sprint.id) || new Set());
   }
 }

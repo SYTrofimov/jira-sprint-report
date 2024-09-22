@@ -63,4 +63,4 @@ The `scripts/` folder contains scripts for performing mass-validation, which is 
 
 ### Validation
 
-Run `test-on-saved-boards.js` to validate `jira-sprint-report` against the original GreenHopper API on the saved board data.
+Run `node scripts/test-on-saved-boards.js` to validate `jira-sprint-report` against the saved board data, including the original GreenHopper API responses.

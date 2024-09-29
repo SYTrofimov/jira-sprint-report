@@ -44,11 +44,11 @@ async function jiraGetItems(route, node = 'values') {
     const response = await jiraGet(route + separator + `startAt=${startAt}`);
     items = items.concat(response[node]);
 
-    if (response.isLast || response.isLast === undefined) {
+    startAt += response.maxResults;
+
+    if (startAt >= response.total) {
       break;
     }
-
-    startAt += response.maxResults;
   }
 
   return items;

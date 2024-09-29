@@ -3,6 +3,8 @@ import fs from 'fs';
 
 import { jiraGet, jiraGetItems } from './utils.js';
 
+const MAX_SPRINTS = 10;
+
 const CUSTOM_FIELDS = JSON.parse(fs.readFileSync('data/custom-fields.json', 'utf8'));
 
 let fields = `status,${CUSTOM_FIELDS.sprint}`;
@@ -30,7 +32,8 @@ async function saveBoard(board) {
     fs.mkdirSync(boardPath);
   }
 
-  const sprints = await jiraGetItems(`rest/agile/1.0/board/${board.id}/sprint`);
+  const allSprints = await jiraGetItems(`rest/agile/1.0/board/${board.id}/sprint`);
+  const sprints = allSprints.filter((sprint) => sprint.state === 'closed').slice(-MAX_SPRINTS);
   cleanSprints(sprints);
   fs.writeFileSync(boardPath + '/sprints.json', JSON.stringify(sprints, null, 2));
   console.log(`Saved ${sprints.length} board sprints`);

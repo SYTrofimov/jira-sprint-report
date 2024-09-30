@@ -64,9 +64,7 @@ async function testOnSavedBoard(board, sprintId) {
   const velocity = JSON.parse(fs.readFileSync(boardPath + '/velocity.json', 'utf8'));
   console.log('Loaded GreenHopper velocity report');
 
-  if (!sprintId) {
-    testVelocityReport(velocity, updatedIssues, sprints);
-  }
+  testVelocityReport(velocity, updatedIssues, sprints, sprintId);
 
   const removedIssuesBySprintIdMap = removedIssuesBySprintId(updatedIssues, sprintsById);
 
@@ -78,12 +76,16 @@ async function testOnSavedBoard(board, sprintId) {
   }
 }
 
-function testVelocityReport(jiraVelocityReport, issues, sprints) {
+function testVelocityReport(jiraVelocityReport, issues, sprints, sprintId) {
   console.log('Testing against Greenhopper velocity report');
 
   const ourVelocityReport = velocityReport(issues, sprints);
 
   for (let i = 0; i < sprints.length; i++) {
+    if (sprintId && sprints[i].id !== sprintId) {
+      continue; // Skip sprints that don't match the specified sprint ID
+    }
+
     const jiraStats = jiraVelocityReport.velocityStatEntries[sprints[i].id];
     const ourStats = ourVelocityReport[i];
 

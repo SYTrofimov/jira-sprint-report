@@ -84,10 +84,6 @@ function testVelocityReport(jiraVelocityReport, issues, sprints) {
   const ourVelocityReport = velocityReport(issues, sprints);
 
   for (let i = 0; i < sprints.length; i++) {
-    if (sprints[i].state !== 'closed') {
-      continue;
-    }
-
     const jiraStats = jiraVelocityReport.velocityStatEntries[sprints[i].id];
     const ourStats = ourVelocityReport[i];
 
@@ -107,10 +103,6 @@ function testVelocityReport(jiraVelocityReport, issues, sprints) {
 }
 
 async function testOnSavedSprint(board, sprint, removedIssues) {
-  if (sprint.state !== 'closed') {
-    return;
-  }
-
   console.log(`Testing sprint ${sprint.id} - ${sprint.name}`);
 
   const sprintPathPrefix = `data/board-${board.id}/${sprint.id}-`;

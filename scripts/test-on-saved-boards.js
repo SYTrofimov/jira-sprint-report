@@ -38,7 +38,7 @@ function parseCommandLineArgs() {
 
 async function testOnSavedBoards() {
   const customFields = JSON.parse(fs.readFileSync('data/custom-fields.json', 'utf8'));
-  initSprintReport(customFields, ['Done']);
+  initSprintReport(customFields, ['Done', 'Closed']);
 
   const boards = JSON.parse(fs.readFileSync('data/boards.json', 'utf8'));
 

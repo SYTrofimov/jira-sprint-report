@@ -451,6 +451,20 @@ describe('issueSprintReport', () => {
     expect(result.outcome).toBe('PUNTED');
     expect(result.finalEstimate).toBe(5);
   });
+
+  test('Issue completed in second sprint, sprint field in reverse order', () => {
+    const issue = makeIssue();
+    issue.fields.customfield_sprint = [SPRINT2, SPRINT1];
+    issue.fields.status = {
+      name: 'Done',
+    };
+    addSprintChange(issue, '', SPRINT1.id, BEFORE_SPRINT1);
+    addSprintChange(issue, SPRINT1.id, `${SPRINT1.id}, ${SPRINT2.id}`, JUST_AFTER_SPRINT1_COMPLETE);
+    addStatusChange(issue, 'To Do', 'Done', DURING_SPRINT2);
+
+    const result = issueSprintReport(issue, SPRINT2);
+    expect(result.outcome).toBe('COMPLETED');
+  });
 });
 
 const SPRINTS_BY_ID = new Map([

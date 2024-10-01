@@ -64,11 +64,23 @@ function isStoryPointFieldId(fieldId) {
   return fieldId === CUSTOM_FIELDS.storyPoints || fieldId === CUSTOM_FIELDS.storyPointEstimate;
 }
 
-function lastSprintIdFromSprintField(sprintField) {
+function lastSprintIdFromSprintFieldByStartDate(sprintField) {
   if (!sprintField || sprintField.length === 0) {
     return null;
   }
-  return sprintField[sprintField.length - 1].id;
+
+  let lastSprintId = null;
+  let latestStartDate = null;
+
+  for (const sprint of sprintField) {
+    const startDate = new Date(sprint.startDate);
+    if (!latestStartDate || startDate > latestStartDate) {
+      latestStartDate = startDate;
+      lastSprintId = sprint.id;
+    }
+  }
+
+  return lastSprintId;
 }
 
 function lastSprintIdFromSprintString(sprintString) {
@@ -114,7 +126,7 @@ function issueSprintReport(issue, sprint) {
   const completeTime = new Date(sprint.completeDate);
 
   let storyPoints = storyPointFieldValue(issue);
-  let sprintId = lastSprintIdFromSprintField(issue.fields[CUSTOM_FIELDS.sprint]);
+  let sprintId = lastSprintIdFromSprintFieldByStartDate(issue.fields[CUSTOM_FIELDS.sprint]);
 
   let storyPointsWhenAdded;
 

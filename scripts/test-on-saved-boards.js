@@ -152,7 +152,7 @@ async function testOnSavedSprint(board, sprint, removedIssues) {
   );
 
   sprintReportIssueResults.push(
-    ...sprintReport.contents.puntedIssues.map((issue) => issueResult(issue, 'PUNTED')),
+    ...sprintReport.contents.puntedIssues.map((issue) => issueResult(issue, 'REMOVED')),
   );
 
   sprintReportIssueResults.push(

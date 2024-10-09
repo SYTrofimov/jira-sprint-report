@@ -87,6 +87,10 @@ function testVelocityReport(jiraVelocityReport, issues, sprints, sprintId) {
     }
 
     const jiraStats = jiraVelocityReport.velocityStatEntries[sprints[i].id];
+    if (!jiraStats) {
+      continue; // No corresponding sprint in Jira velocity report
+    }
+
     const ourStats = ourVelocityReport[i];
 
     console.log(`Testing sprint ${sprints[i].id} - ${sprints[i].name}`);
@@ -173,6 +177,11 @@ async function testOnSavedSprint(board, sprint, removedIssues) {
           break;
         }
       }
+    }
+
+    if (!issue) {
+      console.error('\x1b[31mIssue not on the board!\x1b[0m');
+      continue;
     }
 
     const ourResult = issueSprintReport(issue, sprint);

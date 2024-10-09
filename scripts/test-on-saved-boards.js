@@ -127,7 +127,6 @@ async function testOnSavedSprint(board, sprint, removedIssues) {
   for (const issue in sprintReport.contents.issueKeysAddedDuringSprint) {
     issueKeysAddedDuringSprint.add(issue);
   }
-  console.log('Issues added during sprint', issueKeysAddedDuringSprint);
 
   function issueResult(issue, outcome) {
     const initialEstimate = issue.estimateStatistic.statFieldValue.value;

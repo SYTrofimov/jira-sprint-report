@@ -98,7 +98,7 @@ function lastSprintIdFromSprintString(sprintString) {
  * @param {Object} sprint - Sprint object from Jira Get Sprint API.
  * @returns {Object} - An object in the following format:
  * {
- *   outcome 'COMPLETED' | 'NOT_COMPLETED' | 'PUNTED' | 'NOT_RELEVANT',
+ *   outcome 'COMPLETED' | 'NOT_COMPLETED' | 'REMOVED' | 'NOT_RELEVANT',
  *   initialEstimate: float,
  *   finalEstimate: float,
  *   addedDuringSprint: boolean,
@@ -180,7 +180,7 @@ function issueSprintReport(issue, sprint) {
   if (finalSprintId === sprint.id) {
     outcome = DONE_STATUSES.has(finalStatus) ? 'COMPLETED' : 'NOT_COMPLETED';
   } else {
-    outcome = 'PUNTED';
+    outcome = 'REMOVED';
   }
 
   const result = {

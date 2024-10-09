@@ -429,7 +429,7 @@ describe('issueSprintReport', () => {
     addSprintChange(issue, SPRINT1.id, SPRINT2.id, DURING_SPRINT1);
 
     const result = issueSprintReport(issue, SPRINT1);
-    expect(result.outcome).toBe('PUNTED');
+    expect(result.outcome).toBe('REMOVED');
   });
 
   test('initialEstimate when added, not when sprint started', () => {
@@ -448,7 +448,7 @@ describe('issueSprintReport', () => {
     addStoryPointChange(issue, 3, 5, DURING_SPRINT1_2);
 
     const result = issueSprintReport(issue, SPRINT1);
-    expect(result.outcome).toBe('PUNTED');
+    expect(result.outcome).toBe('REMOVED');
     expect(result.finalEstimate).toBe(5);
   });
 

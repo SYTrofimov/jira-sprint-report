@@ -1,11 +1,11 @@
 'use strict';
 import fs from 'fs';
 
-import { jiraGet, jiraGetItems } from './utils.js';
+import { jiraGet, jiraGetItems, DATA_SUFFIX } from './utils.js';
 
 const MAX_SPRINTS = 10;
 
-const CUSTOM_FIELDS = JSON.parse(fs.readFileSync('data/custom-fields.json', 'utf8'));
+const CUSTOM_FIELDS = JSON.parse(fs.readFileSync(`data${DATA_SUFFIX}/custom-fields.json`, 'utf8'));
 
 let fields = `status,${CUSTOM_FIELDS.sprint}`;
 if (CUSTOM_FIELDS.storyPoints) {
@@ -17,7 +17,7 @@ if (CUSTOM_FIELDS.storyPointEstimate) {
 const FIELDS = fields;
 
 async function saveListedBoards() {
-  const boards = JSON.parse(fs.readFileSync('data/boards.json', 'utf8'));
+  const boards = JSON.parse(fs.readFileSync(`data${DATA_SUFFIX}/boards.json`, 'utf8'));
   for (const board of boards) {
     await saveBoard(board);
   }
@@ -26,7 +26,7 @@ async function saveListedBoards() {
 async function saveBoard(board) {
   console.log(`Saving board ${board.id} - ${board.name}`);
 
-  const boardPath = `data/board-${board.id}`;
+  const boardPath = `data${DATA_SUFFIX}/board-${board.id}`;
 
   if (!fs.existsSync(boardPath)) {
     fs.mkdirSync(boardPath);
@@ -61,7 +61,7 @@ async function saveBoard(board) {
 async function saveSprint(board, sprint) {
   console.log(`Saving sprint ${sprint.id} - ${sprint.name}`);
 
-  const sprintPathPrefix = `data/board-${board.id}/${sprint.id}-`;
+  const sprintPathPrefix = `data${DATA_SUFFIX}/board-${board.id}/${sprint.id}-`;
 
   const issues = await jiraGetItems(
     `rest/agile/1.0/board/${board.id}/sprint/${sprint.id}/issue` +

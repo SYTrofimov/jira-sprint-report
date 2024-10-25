@@ -1,16 +1,16 @@
 'use strict';
 import fs from 'fs';
 
-import { jiraGetItems } from './utils.js';
+import { jiraGetItems, DATA_SUFFIX } from './utils.js';
 
 async function saveBoardList() {
-  if (!fs.existsSync('data')) {
-    fs.mkdirSync('data');
+  if (!fs.existsSync(`data${DATA_SUFFIX}`)) {
+    fs.mkdirSync(`data${DATA_SUFFIX}`);
   }
 
   const boards = await jiraGetItems('rest/agile/1.0/board');
   cleanBoardList(boards);
-  fs.writeFileSync('data/boards.json', JSON.stringify(boards, null, 2));
+  fs.writeFileSync(`data${DATA_SUFFIX}/boards.json`, JSON.stringify(boards, null, 2));
   console.log('Saved board list');
 }
 

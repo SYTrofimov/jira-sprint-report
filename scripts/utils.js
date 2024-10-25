@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 dotenv.config();
 import axios from 'axios';
 
+const DATA_SUFFIX = process.env.DATA_SUFFIX ?? '';
+
 const AXIOS_CONFIG = {
   auth: {
     username: process.env.JIRA_USERNAME ?? '',
@@ -54,4 +56,4 @@ async function jiraGetItems(route, node = 'values') {
   return items;
 }
 
-export { jiraGet, jiraGetItems };
+export { jiraGet, jiraGetItems, DATA_SUFFIX };

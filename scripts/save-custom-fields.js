@@ -1,11 +1,11 @@
 'use strict';
 import fs from 'fs';
 
-import { jiraGet } from './utils.js';
+import { jiraGet, DATA_SUFFIX } from './utils.js';
 
 async function saveCustomFields() {
-  if (!fs.existsSync('data')) {
-    fs.mkdirSync('data');
+  if (!fs.existsSync(`data${DATA_SUFFIX}`)) {
+    fs.mkdirSync(`data${DATA_SUFFIX}`);
   }
 
   let customFields = {};
@@ -23,7 +23,7 @@ async function saveCustomFields() {
     }
   }
 
-  fs.writeFileSync('data/custom-fields.json', JSON.stringify(customFields, null, 2));
+  fs.writeFileSync(`data${DATA_SUFFIX}/custom-fields.json`, JSON.stringify(customFields, null, 2));
   console.log('Saved custom fields');
 }
 

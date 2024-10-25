@@ -4,6 +4,8 @@
 import fs from 'fs';
 import process from 'process';
 
+import { DATA_SUFFIX } from './utils.js';
+
 import {
   initSprintReport,
   issueSprintReport,
@@ -37,10 +39,10 @@ function parseCommandLineArgs() {
 }
 
 async function testOnSavedBoards() {
-  const customFields = JSON.parse(fs.readFileSync('data/custom-fields.json', 'utf8'));
+  const customFields = JSON.parse(fs.readFileSync(`data${DATA_SUFFIX}/custom-fields.json`, 'utf8'));
   initSprintReport(customFields, ['Done', 'Closed', 'Requires Acceptance']);
 
-  const boards = JSON.parse(fs.readFileSync('data/boards.json', 'utf8'));
+  const boards = JSON.parse(fs.readFileSync(`data${DATA_SUFFIX}/boards.json`, 'utf8'));
 
   const args = parseCommandLineArgs();
 
@@ -52,7 +54,7 @@ async function testOnSavedBoards() {
 async function testOnSavedBoard(board, sprintId) {
   console.log(`Testing velocity on board ${board.id} - ${board.name}`);
 
-  const boardPath = `data/board-${board.id}`;
+  const boardPath = `data${DATA_SUFFIX}/board-${board.id}`;
 
   const sprints = JSON.parse(fs.readFileSync(boardPath + '/sprints.json', 'utf8'));
   console.log(`Loaded ${sprints.length} board sprints`);
@@ -111,7 +113,7 @@ function testVelocityReport(jiraVelocityReport, issues, sprints, sprintId) {
 async function testOnSavedSprint(board, sprint, removedIssues) {
   console.log(`Testing sprint ${sprint.id} - ${sprint.name}`);
 
-  const sprintPathPrefix = `data/board-${board.id}/${sprint.id}-`;
+  const sprintPathPrefix = `data${DATA_SUFFIX}/board-${board.id}/${sprint.id}-`;
 
   const issues = JSON.parse(fs.readFileSync(sprintPathPrefix + 'sprint-issues.json', 'utf8'));
   console.log(`Loaded ${issues.length} issues`);

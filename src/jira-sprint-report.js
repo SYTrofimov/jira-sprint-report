@@ -64,26 +64,13 @@ function isStoryPointFieldId(fieldId) {
   return fieldId === CUSTOM_FIELDS.storyPoints || fieldId === CUSTOM_FIELDS.storyPointEstimate;
 }
 
-function lastSprintIdFromSprintFieldByStartDateOrFirstNotClosed(sprintField) {
-  if (!sprintField || sprintField.length === 0) {
-    return null;
-  }
+function sprintIdSetFromIssue(issue) {
+  const sprints = issue.fields[CUSTOM_FIELDS.sprint];
+  return new Set(sprints.map((sprint) => sprint.id));
+}
 
-  let lastSprintId = null;
-  let latestStartDate = null;
-
-  for (const sprint of sprintField) {
-    if (sprint.state !== 'closed') {
-      return sprint.id;
-    }
-    const startDate = new Date(sprint.startDate);
-    if (!latestStartDate || startDate > latestStartDate) {
-      latestStartDate = startDate;
-      lastSprintId = sprint.id;
-    }
-  }
-
-  return lastSprintId;
+function sprintIdSetFromSprintIdString(sprintIdString) {
+  return new Set(sprintIdString.split(/, |,/).map((id) => parseInt(id)));
 }
 
 function lastSprintIdFromSprintString(sprintString) {
@@ -129,14 +116,12 @@ function issueSprintReport(issue, sprint) {
   const completeTime = new Date(sprint.completeDate);
 
   let storyPoints = storyPointFieldValue(issue);
-  let sprintId = lastSprintIdFromSprintFieldByStartDateOrFirstNotClosed(
-    issue.fields[CUSTOM_FIELDS.sprint],
-  );
+  let sprintIdSet = sprintIdSetFromIssue(issue);
 
   let storyPointsWhenAdded;
 
   let finalStoryPoints = storyPoints;
-  let finalSprintId = sprintId;
+  let finalSprintIdSet = sprintIdSet;
   let finalStatus = issue.fields.status.name;
 
   let addedDuringSprint = false;
@@ -156,13 +141,13 @@ function issueSprintReport(issue, sprint) {
           finalStoryPoints = storyPoints;
         }
       } else if (item.fieldId === CUSTOM_FIELDS.sprint) {
-        sprintId = lastSprintIdFromSprintString(item.from);
+        sprintIdSet = sprintIdSetFromSprintIdString(item.from);
 
         if (historyTime > completeTime) {
-          finalSprintId = sprintId;
+          finalSprintIdSet = sprintIdSet;
         } else {
-          const lastToSprintId = lastSprintIdFromSprintString(item.to);
-          if (lastToSprintId === sprint.id) {
+          const toSprintIdSet = sprintIdSetFromSprintIdString(item.to);
+          if (toSprintIdSet.has(sprint.id) && !sprintIdSet.has(sprint.id)) {
             storyPointsWhenAdded = storyPoints;
             addedDuringSprint = true;
           }
@@ -175,14 +160,14 @@ function issueSprintReport(issue, sprint) {
     }
   }
 
-  if (sprintId === sprint.id) {
+  if (sprintIdSet.has(sprint.id)) {
     addedDuringSprint = false;
-  } else if (finalSprintId !== sprint.id && !addedDuringSprint) {
+  } else if (!finalSprintIdSet.has(sprint.id)) {
     return { outcome: 'NOT_RELEVANT' };
   }
 
   let outcome;
-  if (finalSprintId === sprint.id) {
+  if (finalSprintIdSet.has(sprint.id)) {
     outcome = DONE_STATUSES.has(finalStatus) ? 'COMPLETED' : 'NOT_COMPLETED';
   } else {
     outcome = 'REMOVED';

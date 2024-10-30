@@ -7,7 +7,7 @@ const MAX_SPRINTS = 10;
 
 const CUSTOM_FIELDS = JSON.parse(fs.readFileSync(`data${DATA_SUFFIX}/custom-fields.json`, 'utf8'));
 
-let fields = `status,${CUSTOM_FIELDS.sprint}`;
+let fields = `created,status,${CUSTOM_FIELDS.sprint}`;
 if (CUSTOM_FIELDS.storyPoints) {
   fields += `,${CUSTOM_FIELDS.storyPoints}`;
 }
@@ -95,6 +95,7 @@ function cleanSprints(sprints) {
 function cleanIssues(issues) {
   const allowedProperties = ['key', 'changelog', 'fields'];
   const allowedFields = [
+    'created',
     'status',
     CUSTOM_FIELDS.sprint,
     CUSTOM_FIELDS.storyPoints,

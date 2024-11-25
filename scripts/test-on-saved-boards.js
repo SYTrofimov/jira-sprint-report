@@ -166,8 +166,6 @@ async function testOnSavedSprint(board, sprint, removedIssues) {
   sprintReport.contents.issueKeysAddedDuringSprint;
 
   for (const { key, ...jiraResult } of sprintReportIssueResults) {
-    console.log('Testing issue', key);
-
     const jiraResultJSON = JSON.stringify(jiraResult);
 
     let issue = issues.find((issue) => issue.key === key);
@@ -181,7 +179,7 @@ async function testOnSavedSprint(board, sprint, removedIssues) {
     }
 
     if (!issue) {
-      console.error('\x1b[31mIssue not on the board!\x1b[0m');
+      console.error(`Issue ${key}:\x1b[31m not on the board!\x1b[0m`);
       continue;
     }
 
@@ -189,9 +187,11 @@ async function testOnSavedSprint(board, sprint, removedIssues) {
     const ourResultJSON = JSON.stringify(ourResult);
 
     if (jiraResultJSON !== ourResultJSON) {
-      console.error('\x1b[31mResults do not match!\x1b[0m');
+      console.error(`Issue ${key}:\x1b[31m mismatch!\x1b[0m`);
       console.error('Jira sprint report:', jiraResult);
       console.error('Our sprint report:', ourResult);
+
+      const ourResult2 = issueSprintReport(issue, sprint);
     }
   }
 }

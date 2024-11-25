@@ -472,6 +472,7 @@ describe('issueSprintReport', () => {
 
     const result = issueSprintReport(issue, SPRINT1);
     expect(result.addedDuringSprint).toBe(true);
+    expect(result.initialEstimate).toBe(5);
   });
 });
 

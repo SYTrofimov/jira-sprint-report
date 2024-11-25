@@ -99,13 +99,13 @@ function testVelocityReport(jiraVelocityReport, issues, sprints, sprintId) {
 
     if (jiraStats.estimated.value !== ourStats.planned) {
       console.error('\x1b[31mResults do not match!\x1b[0m');
-      console.error('Jira sprint report:', jiraStats.estimated.value);
-      console.error('Our sprint report:', ourStats.planned);
+      console.error('Jira sprint report estimated:', jiraStats.estimated.value);
+      console.error('Our sprint report planned:', ourStats.planned);
     }
     if (jiraStats.completed.value !== ourStats.completed) {
       console.error('\x1b[31mResults do not match!\x1b[0m');
-      console.error('Jira sprint report:', jiraStats.completed.value);
-      console.error('Our sprint report:', ourStats.completed);
+      console.error('Jira sprint report completed:', jiraStats.completed.value);
+      console.error('Our sprint report completed:', ourStats.completed);
     }
   }
 }
@@ -190,8 +190,6 @@ async function testOnSavedSprint(board, sprint, removedIssues) {
       console.error(`Issue ${key}:\x1b[31m mismatch!\x1b[0m`);
       console.error('Jira sprint report:', jiraResult);
       console.error('Our sprint report:', ourResult);
-
-      const ourResult2 = issueSprintReport(issue, sprint);
     }
   }
 }

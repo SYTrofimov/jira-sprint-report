@@ -465,6 +465,14 @@ describe('issueSprintReport', () => {
     const result = issueSprintReport(issue, SPRINT2);
     expect(result.outcome).toBe('COMPLETED');
   });
+
+  test('Issue created in sprint, probably as subtask, so no record of sprint field changes', () => {
+    const issue = makeIssue();
+    issue.fields.created = '2024-01-10T11:00:29.712Z';
+
+    const result = issueSprintReport(issue, SPRINT1);
+    expect(result.addedDuringSprint).toBe(true);
+  });
 });
 
 const SPRINTS_BY_ID = new Map([

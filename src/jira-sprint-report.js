@@ -166,6 +166,13 @@ function issueSprintReport(issue, sprint) {
     return { outcome: 'NOT_RELEVANT' };
   }
 
+  const createTime = new Date(issue.fields.created);
+  if (createTime > startTime) {
+    // Issue created in sprint, probably as subtask, so no record of sprint field changes,
+    // but it is still added during the sprint
+    addedDuringSprint = true;
+  }
+
   let outcome;
   if (finalSprintIdSet.has(sprint.id)) {
     outcome = DONE_STATUSES.has(finalStatus) ? 'COMPLETED' : 'NOT_COMPLETED';

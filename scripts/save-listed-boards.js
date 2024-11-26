@@ -103,32 +103,38 @@ function cleanIssues(issues) {
   ];
 
   for (const issue of issues) {
-    for (const key of Object.keys(issue)) {
-      if (allowedProperties.includes(key)) {
-        if (key === 'fields') {
-          for (const field of Object.keys(issue[key])) {
-            if (!allowedFields.includes(field)) {
-              delete issue[key][field];
-            }
-          }
-        } else if (key === 'changelog') {
-          for (const history of issue[key].histories) {
-            for (const key of Object.keys(history)) {
-              if (key === 'items') {
-                for (const item of history[key]) {
-                  if (!allowedFields.includes(item.fieldId)) {
-                    const index = history[key].indexOf(item);
-                    history[key].splice(index, 1);
-                  }
-                }
-              } else if (key !== 'created') {
-                delete history[key];
+    for (const issueProperty of Object.keys(issue)) {
+      if (!allowedProperties.includes(issueProperty)) {
+        delete issue[issueProperty];
+      }
+    }
+
+    for (const field of Object.keys(issue.fields)) {
+      if (!allowedFields.includes(field)) {
+        delete issue.fields[field];
+      }
+    }
+
+    if (issue.changelog) {
+      const histories = issue.changelog.histories;
+      for (let i = histories.length - 1; i >= 0; i--) {
+        const history = histories[i];
+        for (const historyProperty of Object.keys(history)) {
+          if (historyProperty === 'items') {
+            for (let j = history.items.length - 1; j >= 0; j--) {
+              const historyItem = history.items[j];
+              if (!allowedFields.includes(historyItem.fieldId)) {
+                history.items.splice(j, 1);
               }
             }
+          } else if (historyProperty !== 'created') {
+            delete history[historyProperty];
           }
         }
-      } else {
-        delete issue[key];
+
+        if (history.items.length === 0) {
+          histories.splice(i, 1);
+        }
       }
     }
   }

@@ -93,7 +93,7 @@ function cleanSprints(sprints) {
 }
 
 function cleanIssues(issues) {
-  const allowedProperties = ['key', 'changelog', 'fields'];
+  const allowedIssueProperties = ['key', 'changelog', 'fields'];
   const allowedFields = [
     'created',
     'status',
@@ -101,10 +101,11 @@ function cleanIssues(issues) {
     CUSTOM_FIELDS.storyPoints,
     CUSTOM_FIELDS.storyPointEstimate,
   ];
+  const allowedHistoryProperties = ['created', 'items'];
 
   for (const issue of issues) {
     for (const issueProperty of Object.keys(issue)) {
-      if (!allowedProperties.includes(issueProperty)) {
+      if (!allowedIssueProperties.includes(issueProperty)) {
         delete issue[issueProperty];
       }
     }
@@ -117,23 +118,24 @@ function cleanIssues(issues) {
 
     if (issue.changelog) {
       const histories = issue.changelog.histories;
-      for (let i = histories.length - 1; i >= 0; i--) {
-        const history = histories[i];
+      for (let historyIndex = histories.length - 1; historyIndex >= 0; historyIndex--) {
+        const history = histories[historyIndex];
+
         for (const historyProperty of Object.keys(history)) {
-          if (historyProperty === 'items') {
-            for (let j = history.items.length - 1; j >= 0; j--) {
-              const historyItem = history.items[j];
-              if (!allowedFields.includes(historyItem.fieldId)) {
-                history.items.splice(j, 1);
-              }
-            }
-          } else if (historyProperty !== 'created') {
+          if (!allowedHistoryProperties.includes(historyProperty)) {
             delete history[historyProperty];
           }
         }
 
+        for (let itemIndex = history.items.length - 1; itemIndex >= 0; itemIndex--) {
+          const historyItem = history.items[itemIndex];
+          if (!allowedFields.includes(historyItem.fieldId)) {
+            history.items.splice(itemIndex, 1);
+          }
+        }
+
         if (history.items.length === 0) {
-          histories.splice(i, 1);
+          histories.splice(historyIndex, 1);
         }
       }
     }

@@ -70,6 +70,9 @@ function sprintIdSetFromIssue(issue) {
 }
 
 function sprintIdSetFromSprintIdString(sprintIdString) {
+  if (!sprintIdString) {
+    return new Set();
+  }
   return new Set(sprintIdString.split(/, |,/).map((id) => parseInt(id)));
 }
 
@@ -162,7 +165,7 @@ function issueSprintReport(issue, sprint) {
 
   if (sprintIdSet.has(sprint.id)) {
     addedDuringSprint = false;
-  } else if (!finalSprintIdSet.has(sprint.id)) {
+  } else if (!finalSprintIdSet.has(sprint.id) && !addedDuringSprint) {
     return { outcome: 'NOT_RELEVANT' };
   }
 

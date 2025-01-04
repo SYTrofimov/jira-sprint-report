@@ -395,6 +395,17 @@ describe('issueSprintReport', () => {
     expect(result.addedDuringSprint).toBe(false);
   });
 
+  test('Issue added and removed again during sprint', () => {
+    const issue = makeIssue();
+    issue.fields.customfield_sprint = [];
+    addSprintChange(issue, '', SPRINT1.id, DURING_SPRINT1);
+    addSprintChange(issue, SPRINT1.id, '', DURING_SPRINT1_2);
+
+    const result = issueSprintReport(issue, SPRINT1);
+    expect(result.outcome).toBe('REMOVED');
+    expect(result.addedDuringSprint).toBe(true);
+  });
+
   test('Issue added from next sprint, not completed', () => {
     const issue = makeIssue();
     issue.fields.customfield_sprint.push(SPRINT2);

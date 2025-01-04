@@ -167,7 +167,7 @@ function issueSprintReport(issue, sprint) {
   }
 
   const createTime = new Date(issue.fields.created);
-  if (createTime > startTime) {
+  if (createTime > startTime && !addedDuringSprint) {
     // Issue created in sprint, probably as subtask, so no record of sprint field changes,
     // but it is still added during the sprint
     storyPointsWhenAdded = storyPoints;

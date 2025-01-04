@@ -468,7 +468,18 @@ describe('issueSprintReport', () => {
 
   test('Issue created in sprint, probably as subtask, so no record of sprint field changes', () => {
     const issue = makeIssue();
-    issue.fields.created = '2024-01-10T11:00:29.712Z';
+    issue.fields.created = DURING_SPRINT1;
+
+    const result = issueSprintReport(issue, SPRINT1);
+    expect(result.addedDuringSprint).toBe(true);
+    expect(result.initialEstimate).toBe(5);
+  });
+
+  test('Issue created during sprint, then added', () => {
+    const issue = makeIssue();
+    issue.fields.created = DURING_SPRINT1;
+    addStoryPointChange(issue, null, 5, DURING_SPRINT1_2);
+    addSprintChange(issue, '', SPRINT1.id, DURING_SPRINT1_3);
 
     const result = issueSprintReport(issue, SPRINT1);
     expect(result.addedDuringSprint).toBe(true);

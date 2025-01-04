@@ -33,6 +33,7 @@ async function saveBoard(board) {
   }
 
   const allSprints = await jiraGetItems(`rest/agile/1.0/board/${board.id}/sprint`);
+  allSprints.sort((a, b) => (a.startDate > b.startDate ? 1 : -1));
   const sprints = allSprints.filter((sprint) => sprint.state === 'closed').slice(-MAX_SPRINTS);
   cleanSprints(sprints);
   fs.writeFileSync(boardPath + '/sprints.json', JSON.stringify(sprints, null, 2));

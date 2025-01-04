@@ -190,6 +190,9 @@ async function testOnSavedSprint(board, sprint, removedIssues) {
       console.error(`Issue ${key}:\x1b[31m mismatch!\x1b[0m`);
       console.error('Jira sprint report:', jiraResult);
       console.error('Our sprint report:', ourResult);
+
+      // put a breakpoint on the next line to debug the issue
+      const ourResult2 = issueSprintReport(issue, sprint);
     }
   }
 }

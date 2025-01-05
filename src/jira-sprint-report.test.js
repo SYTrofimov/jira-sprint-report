@@ -584,6 +584,19 @@ describe('issueRemovedFromSprints', () => {
     expect(issuesBySprintId.get(SPRINT1.id).has(issue)).toBe(true);
   });
 
+  test('Issue removed from active sprint, sprint ID not last', () => {
+    const issue = makeIssue();
+    addSprintChange(issue, '', SPRINT1.id, BEFORE_SPRINT1);
+    addSprintChange(issue, SPRINT1.id, `${SPRINT2.id}, ${SPRINT1.id}`, JUST_AFTER_SPRINT1_COMPLETE);
+    addSprintChange(issue, `${SPRINT2.id}, ${SPRINT1.id}`, SPRINT1.id, DURING_SPRINT2);
+    const issues = [issue];
+
+    const issuesBySprintId = removedIssuesBySprintId(issues, SPRINTS_BY_ID);
+
+    expect(issuesBySprintId.size).toBe(1);
+    expect(issuesBySprintId.get(SPRINT2.id).has(issue)).toBe(true);
+  });
+
   test('Issue removed from unknown sprint', () => {
     const sprintsById = new Map([[SPRINT2.id, SPRINT2]]);
 

@@ -76,14 +76,6 @@ function sprintIdSetFromSprintIdString(sprintIdString) {
   return new Set(sprintIdString.split(/, |,/).map((id) => parseInt(id)));
 }
 
-function lastSprintIdFromSprintString(sprintString) {
-  if (!sprintString) {
-    return null;
-  }
-  const chunks = sprintString.split(/, |,/);
-  return parseInt(chunks[chunks.length - 1]);
-}
-
 /**
  * Determine the relationship of an issue with respect to a given sprint for a sprint report.
  * Sprint must be closed. Issue changelog is expected to be sorted by created date in descending order.
@@ -205,21 +197,6 @@ function issueSprintReport(issue, sprint) {
   return result;
 }
 
-function sprintIdsFromSprintString(sprintString) {
-  if (!sprintString) {
-    return null;
-  }
-
-  const chunks = sprintString.split(/, |,/);
-
-  const sprintIds = new Set();
-  for (let chunk of chunks) {
-    sprintIds.add(parseInt(chunk));
-  }
-
-  return sprintIds;
-}
-
 /**
  * Determine the issues that were removed from active sprints.
  * Issue changelog is expected to be sorted by created date in descending order.
@@ -238,27 +215,31 @@ function removedIssuesBySprintId(issues, sprintsById) {
   const removedIssuesBySprintIdMap = new Map();
 
   for (const issue of issues) {
-    for (let history of issue.changelog.histories) {
-      for (let item of history.items) {
+    for (const history of issue.changelog.histories) {
+      for (const item of history.items) {
         if (item.fieldId === CUSTOM_FIELDS.sprint) {
-          const fromSprintId = lastSprintIdFromSprintString(item.from);
-          const toSprintIds = sprintIdsFromSprintString(item.to);
-          if (fromSprintId !== null && (!toSprintIds || !toSprintIds.has(fromSprintId))) {
-            const sprint = sprintsById.get(fromSprintId);
+          const fromSprintIds = sprintIdSetFromSprintIdString(item.from);
+          const toSprintIds = sprintIdSetFromSprintIdString(item.to);
 
-            if (!sprint) {
-              continue;
-            }
+          // iterate over fromSprintIds to find the sprint the issue was removed from
+          for (const fromSprintId of fromSprintIds) {
+            if (!toSprintIds.has(fromSprintId)) {
+              const sprint = sprintsById.get(fromSprintId);
 
-            const startTime = new Date(sprint.startDate);
-            const completeTime = new Date(sprint.completeDate);
-            const historyTime = new Date(history.created);
-
-            if (historyTime >= startTime && historyTime <= completeTime) {
-              if (!removedIssuesBySprintIdMap.has(sprint.id)) {
-                removedIssuesBySprintIdMap.set(sprint.id, new Set());
+              if (!sprint) {
+                continue;
               }
-              removedIssuesBySprintIdMap.get(sprint.id).add(issue);
+
+              const startTime = new Date(sprint.startDate);
+              const completeTime = new Date(sprint.completeDate);
+              const historyTime = new Date(history.created);
+
+              if (historyTime >= startTime && historyTime <= completeTime) {
+                if (!removedIssuesBySprintIdMap.has(sprint.id)) {
+                  removedIssuesBySprintIdMap.set(sprint.id, new Set());
+                }
+                removedIssuesBySprintIdMap.get(sprint.id).add(issue);
+              }
             }
           }
         }

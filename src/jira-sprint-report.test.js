@@ -20,7 +20,7 @@ beforeEach(() => {
       storyPoints: 'customfield_storyPoints',
       storyPointEstimate: 'customfield_storyPointEstimate',
     },
-    ['Done', 'Closed'],
+    ['Done', 'Closed', 'Requires Acceptance'],
   );
 });
 
@@ -430,12 +430,20 @@ describe('issueSprintReport', () => {
     expect(result.outcome).toBe('NOT_COMPLETED');
   });
 
-  test('Issue removed from sprint', () => {
+  test('Issue completed before sprint', () => {
     const issue = makeIssue();
-    issue.fields.customfield_sprint = [SPRINT2];
     issue.fields.status = {
       name: 'Done',
     };
+    addStatusChange(issue, 'To Do', 'Done', BEFORE_SPRINT1);
+
+    const result = issueSprintReport(issue, SPRINT1);
+    expect(result.outcome).toBe('COMPLETED_IN_ANOTHER_SPRINT');
+  });
+
+  test('Issue removed from sprint', () => {
+    const issue = makeIssue();
+    issue.fields.customfield_sprint = [SPRINT2];
     addSprintChange(issue, '', SPRINT1.id, BEFORE_SPRINT1);
     addSprintChange(issue, SPRINT1.id, SPRINT2.id, DURING_SPRINT1);
 
@@ -495,6 +503,42 @@ describe('issueSprintReport', () => {
     const result = issueSprintReport(issue, SPRINT1);
     expect(result.addedDuringSprint).toBe(true);
     expect(result.initialEstimate).toBe(5);
+  });
+
+  test('Closed issue reopened during sprint, added to sprint, not completed', () => {
+    const issue = makeIssue();
+    issue.fields.status = {
+      name: 'To Do',
+    };
+    addStatusChange(issue, 'Done', 'To Do', DURING_SPRINT1);
+    addSprintChange(issue, '', SPRINT1.id, DURING_SPRINT1_2);
+
+    const result = issueSprintReport(issue, SPRINT1);
+    expect(result.outcome).toBe('NOT_COMPLETED');
+  });
+
+  test('Closed issue reopened during sprint, added to sprint, completed', () => {
+    const issue = makeIssue();
+    issue.fields.status = {
+      name: 'Done',
+    };
+    addStatusChange(issue, 'Done', 'To Do', DURING_SPRINT1);
+    addSprintChange(issue, '', SPRINT1.id, DURING_SPRINT1_2);
+    addStatusChange(issue, 'To Do', 'Done', DURING_SPRINT1_3);
+
+    const result = issueSprintReport(issue, SPRINT1);
+    expect(result.outcome).toBe('COMPLETED');
+  });
+
+  test('Issue changes "done" status during sprint', () => {
+    const issue = makeIssue();
+    issue.fields.status = {
+      name: 'Closed',
+    };
+    addStatusChange(issue, 'Requires Acceptance', 'Closed', DURING_SPRINT1);
+
+    const result = issueSprintReport(issue, SPRINT1);
+    expect(result.outcome).toBe('COMPLETED');
   });
 });
 

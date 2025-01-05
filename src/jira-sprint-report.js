@@ -91,7 +91,7 @@ function lastSprintIdFromSprintString(sprintString) {
  * @param {Object} sprint - Sprint object from Jira Get Sprint API.
  * @returns {Object} - An object in the following format:
  * {
- *   outcome 'COMPLETED' | 'NOT_COMPLETED' | 'REMOVED' | 'NOT_RELEVANT',
+ *   outcome 'COMPLETED' | 'NOT_COMPLETED' | 'REMOVED' | 'COMPLETED_IN_ANOTHER_SPRINT' | 'NOT_RELEVANT',
  *   initialEstimate: float,
  *   finalEstimate: float,
  *   addedDuringSprint: boolean,
@@ -120,14 +120,17 @@ function issueSprintReport(issue, sprint) {
 
   let storyPoints = storyPointFieldValue(issue);
   let sprintIdSet = sprintIdSetFromIssue(issue);
+  let status = issue.fields.status.name;
 
   let storyPointsWhenAdded;
 
   let finalStoryPoints = storyPoints;
   let finalSprintIdSet = sprintIdSet;
-  let finalStatus = issue.fields.status.name;
+  let finalStatus = status;
 
   let addedDuringSprint = false;
+  let completed = false;
+  let reopened = false;
 
   for (let history of issue.changelog.histories) {
     const historyTime = new Date(history.created);
@@ -156,8 +159,14 @@ function issueSprintReport(issue, sprint) {
           }
         }
       } else if (item.fieldId === 'status') {
+        status = item.fromString;
+
         if (historyTime > completeTime) {
-          finalStatus = item.fromString;
+          finalStatus = status;
+        } else if (DONE_STATUSES.has(item.toString)) {
+          completed = true;
+        } else if (DONE_STATUSES.has(item.fromString)) {
+          reopened = true;
         }
       }
     }
@@ -178,7 +187,9 @@ function issueSprintReport(issue, sprint) {
   }
 
   let outcome;
-  if (finalSprintIdSet.has(sprint.id)) {
+  if (DONE_STATUSES.has(status) && !completed && !reopened) {
+    outcome = 'COMPLETED_IN_ANOTHER_SPRINT';
+  } else if (finalSprintIdSet.has(sprint.id)) {
     outcome = DONE_STATUSES.has(finalStatus) ? 'COMPLETED' : 'NOT_COMPLETED';
   } else {
     outcome = 'REMOVED';

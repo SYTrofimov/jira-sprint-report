@@ -232,6 +232,19 @@ describe('issueSprintReport', () => {
     expect(() => issueSprintReport(issue, SPRINT1)).toThrow('Missing');
   });
 
+  test('Sprint null', () => {
+    const issue = makeIssue();
+    issue.fields.customfield_sprint = null;
+    addDummyChange(issue);
+
+    const result = issueSprintReport(issue, SPRINT1);
+
+    expect(result.outcome).toBe('NOT_RELEVANT');
+    expect(result.initialEstimate).toBeUndefined();
+    expect(result.finalEstimate).toBeUndefined();
+    expect(result.addedDuringSprint).toBeUndefined;
+  });
+
   test('Issue not relevant for sprint, never in sprint', () => {
     const issue = makeIssue();
     issue.fields.customfield_sprint = [];

@@ -66,7 +66,11 @@ function isStoryPointFieldId(fieldId) {
 
 function sprintIdSetFromIssue(issue) {
   const sprints = issue.fields[CUSTOM_FIELDS.sprint];
-  return new Set(sprints.map((sprint) => sprint.id));
+  if (!sprints) {
+    return new Set();
+  } else {
+    return new Set(sprints.map((sprint) => sprint.id));
+  }
 }
 
 function sprintIdSetFromSprintIdString(sprintIdString) {

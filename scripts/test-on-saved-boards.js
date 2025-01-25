@@ -192,7 +192,7 @@ async function testOnSavedSprint(board, sprint, removedIssues) {
       console.error('Our sprint report:', ourResult);
 
       // put a breakpoint on the next line to debug the issue
-      const ourResult2 = issueSprintReport(issue, sprint);
+      // const ourResult2 = issueSprintReport(issue, sprint);
     }
   }
 }

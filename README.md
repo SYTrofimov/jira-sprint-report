@@ -39,6 +39,10 @@ jira-sprint-report is a library for calculating GreenHopper-like sprint report b
 
 Look at the unit tests in `src/jira-sprint-report.test.js` and in the `scripts/` folder for more usage examples.
 
+## Limitations
+
+The sprint report is calculated based on the issue changelogs for all issues present on the board at the time of calculation. If the board filter depends on the issue state, some issues may no longer be present on the board. As a result, they will not be included in the velocity calculation, even though they may have been part of the sprint in question in the past.
+
 ## Running the unit tests
 
 The unit tests are set up with Jest. Use the npm test script to run them.

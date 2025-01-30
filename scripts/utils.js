@@ -1,4 +1,5 @@
 'use strict';
+import process from 'process';
 import dotenv from 'dotenv';
 dotenv.config();
 import axios from 'axios';

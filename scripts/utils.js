@@ -35,13 +35,15 @@ async function jiraGet(route) {
 /**
  * Read all 'values' from a Jira API route, making multiple calls if necessary
  * @param {string} route Jira API route
+ * @param {string} node Node containing the items array
+ * @param {number} initialStartAt Initial start index
  * @returns {Promise<any>} Values array
  * @throws {Error} bubbling up from jiraGet()
  */
-async function jiraGetItems(route, node = 'values') {
+async function jiraGetItems(route, node = 'values', initialStartAt = 0) {
   const separator = route.includes('?') ? '&' : '?';
 
-  let startAt = 0;
+  let startAt = initialStartAt;
   let items = [];
   while (true) {
     const response = await jiraGet(route + separator + `startAt=${startAt}`);

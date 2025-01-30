@@ -4,7 +4,7 @@ import fs from 'fs';
 import { jiraGet, jiraGetItems, DATA_SUFFIX } from './utils.js';
 
 const MAX_SPRINTS = 10;
-const MAX_SPRINTS_TO_GET = 20;
+const MAX_SPRINTS_TO_LOAD = 20;
 
 const CUSTOM_FIELDS = JSON.parse(fs.readFileSync(`data${DATA_SUFFIX}/custom-fields.json`, 'utf8'));
 
@@ -37,15 +37,15 @@ async function saveBoard(board) {
   const sprintResponse = await jiraGet(
     `rest/agile/1.0/board/${board.id}/sprint?state=closed&maxResults=1`,
   );
-  const startAt = Math.max(0, sprintResponse.total - MAX_SPRINTS_TO_GET);
-  const allSprints = await jiraGetItems(
+  const startAt = Math.max(0, sprintResponse.total - MAX_SPRINTS_TO_LOAD);
+  const loadedSprints = await jiraGetItems(
     `rest/agile/1.0/board/${board.id}/sprint?state=closed`,
     'values',
     startAt,
   );
 
-  allSprints.sort((a, b) => (a.startDate > b.startDate ? 1 : -1));
-  const sprints = allSprints.slice(-MAX_SPRINTS);
+  loadedSprints.sort((a, b) => (a.startDate > b.startDate ? 1 : -1));
+  const sprints = loadedSprints.slice(-MAX_SPRINTS);
   cleanSprints(sprints);
   fs.writeFileSync(boardPath + '/sprints.json', JSON.stringify(sprints, null, 2));
   console.log(`Saved ${sprints.length} board sprints`);

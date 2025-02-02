@@ -289,13 +289,11 @@ function issuesBySprintId(issues) {
   for (const issue of issues) {
     const sprintIds = sprintIdsFromSprintField(issue.fields[CUSTOM_FIELDS.sprint]);
 
-    const sprintIssues = new Set();
     for (const sprintId of sprintIds) {
       if (!issuesBySprintIdMap.has(sprintId)) {
         issuesBySprintIdMap.set(sprintId, new Set());
       }
-      const sprintIssues = issuesBySprintIdMap.get(sprintId);
-      sprintIssues.add(issue);
+      issuesBySprintIdMap.get(sprintId).add(issue);
     }
   }
   return issuesBySprintIdMap;

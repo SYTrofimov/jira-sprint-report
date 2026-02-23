@@ -7,7 +7,7 @@
     "test": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" jest --config=jest.config.cjs"
   },
   "devDependencies": {
-    "@eslint/js": "^9.19.0",
+    "@eslint/js": "^10.0.1",
     "eslint": "^9.19.0",
     "eslint-config-prettier": "^9.0.0",
     "globals": "^15.14.0",

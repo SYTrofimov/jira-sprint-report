@@ -21,8 +21,6 @@
 - If verification fails, fix compatibility issues caused by the update or stop and report the blocker; do not ship a broken upgrade.
 - Keep dependency sessions small: complete one security fix or one cohesive low-risk update group per commit, then stop for a fresh session unless the user asks to continue.
 - After a dependency change passes verification and the user asked for a commit, create the commit and stop at that checkpoint instead of continuing with more updates automatically.
-- Use `fix(deps): ...` commit subjects for security or vulnerability remediation.
-- Use `chore(deps): ...` commit subjects for routine dependency maintenance.
 - Do not suppress alerts or loosen constraints just to make an update pass without explicit approval.
 - Summarize what changed, why it was needed, what risks remain, and which checks were run.
 

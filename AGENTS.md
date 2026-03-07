@@ -22,6 +22,7 @@ For each user request, determine applicable rules from the table below and follo
 ### Rules Table Of Contents with Scopes
 
 - `.agents/rules/dependency-management.md` - Updating dependencies, lockfiles, Renovate PRs, or dependency alerts
+- `.agents/rules/committing.md` - Creating a git commit
 
 ## Key Documentation
 

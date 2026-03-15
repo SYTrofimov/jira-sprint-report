@@ -1,13 +1,20 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
+  "extends": [
+    "config:recommended"
+  ],
   "rangeStrategy": "replace",
   "semanticCommits": "enabled",
   "semanticCommitType": "chore",
   "semanticCommitScope": "deps",
-  "labels": ["dependencies"],
+  "labels": [
+    "dependencies"
+  ],
   "vulnerabilityAlerts": {
-    "labels": ["dependencies", "security"],
+    "labels": [
+      "dependencies",
+      "security"
+    ],
     "groupName": null,
     "schedule": [],
     "dependencyDashboardApproval": false,
@@ -18,11 +25,15 @@
     "prCreation": "immediate",
     "vulnerabilityFixStrategy": "lowest"
   },
-  "schedule": ["before 06:00 on monday"],
+  "schedule": [
+    "before 06:00 on monday"
+  ],
   "timezone": "UTC",
   "packageRules": [
     {
-      "matchDepTypes": ["devDependencies"],
+      "matchDepTypes": [
+        "devDependencies"
+      ],
       "groupName": "dev tooling",
       "matchPackagePatterns": [
         "^eslint",
@@ -32,6 +43,15 @@
         "^babel-jest",
         "^globals$"
       ]
+    },
+    {
+      "matchPackageNames": [
+        "node",
+        "@types/node"
+      ],
+      "groupName": "node runtime",
+      "allowedVersions": "<23",
+      "description": "Keep Node 22.x pinned; revisit coordinated move to Node 24 in planned review window."
     }
   ]
 }

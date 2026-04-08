@@ -29,6 +29,7 @@
     "before 06:00 on monday"
   ],
   "timezone": "UTC",
+  "minimumReleaseAge": "7 days",
   "packageRules": [
     {
       "matchDepTypes": [

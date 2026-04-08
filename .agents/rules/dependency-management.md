@@ -14,6 +14,9 @@
 - Match each security update to the alert it is intended to fix: note the affected package, manifest, and patched version from `gh` before changing anything.
 - Prefer updating an existing Renovate PR branch over changing versions by hand when Renovate already proposed the fix.
 - If an urgent security fix has no Renovate PR yet, make the smallest targeted manual update that resolves the alert.
+- Apply a release-age cooldown to routine dependency updates, regardless of source, so newly published packages have time to surface supply-chain issues; only bypass it for urgent vulnerability remediation.
+- `pnpm-workspace.yaml` enforces a 7-day cooldown for direct installs and updates; keep that setting in place unless the user explicitly approves a change.
+- For manual dependency updates outside repo-level enforcement, prefer versions released at least 7 days ago unless the change is an urgent security fix.
 - Prefer patch and minor upgrades before majors; do not batch unrelated major upgrades into one change.
 - For major upgrades or changes to Jest, ESLint, Prettier, or core runtime dependencies, check release notes and migration notes before applying.
 - Do not assume a merged or applied Renovate PR clears the alert; verify after the update by re-checking GitHub alerts and local audit output.
@@ -32,3 +35,8 @@
 - Re-check high vulnerabilities: `pnpm audit --audit-level=high`
 - Check freshness: `pnpm outdated`
 - Verify before completion: `pnpm test`
+
+## Renovate config notes
+
+- `pnpm-workspace.yaml` enforces the general 7-day cooldown for direct `pnpm` installs and updates.
+- `renovate.json` enforces the general 7-day cooldown for routine Renovate updates and leaves `vulnerabilityAlerts.minimumReleaseAge` unset so security fix PRs can still open immediately.

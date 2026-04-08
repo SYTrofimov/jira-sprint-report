@@ -2,7 +2,7 @@
 
 ## Scope
 
-- Updating `package.json`, `package-lock.json`, or npm dependencies
+- Updating `package.json`, `pnpm-lock.yaml`, or pnpm dependencies
 - Reviewing Renovate PRs or GitHub dependency alerts
 - Applying security patches or dependency maintenance changes
 
@@ -17,7 +17,7 @@
 - Prefer patch and minor upgrades before majors; do not batch unrelated major upgrades into one change.
 - For major upgrades or changes to Jest, ESLint, Prettier, or core runtime dependencies, check release notes and migration notes before applying.
 - Do not assume a merged or applied Renovate PR clears the alert; verify after the update by re-checking GitHub alerts and local audit output.
-- After each dependency change, run the smallest relevant checks first, then run `npm test` before marking the work complete or committing.
+- After each dependency change, run the smallest relevant checks first, then run `pnpm test` before marking the work complete or committing.
 - If verification fails, fix compatibility issues caused by the update or stop and report the blocker; do not ship a broken upgrade.
 - Keep dependency sessions small: complete one security fix or one cohesive low-risk update group per commit, then stop for a fresh session unless the user asks to continue.
 - After a dependency change passes verification and the user asked for a commit, create the commit and stop at that checkpoint instead of continuing with more updates automatically.
@@ -29,6 +29,6 @@
 - Inspect alerts: `gh api 'repos/SYTrofimov/jira-sprint-report/dependabot/alerts?state=open&per_page=100'`
 - Inspect alert details: `gh api 'repos/SYTrofimov/jira-sprint-report/dependabot/alerts?state=open&per_page=100' --jq 'map({package:.dependency.package.name, manifest:.dependency.manifest_path, severity:.security_advisory.severity, fixed_in:(.security_vulnerability.first_patched_version.identifier // "none")})'`
 - List Renovate PRs: `gh pr list --state open --search 'label:dependencies'`
-- Re-check high vulnerabilities: `npm audit --audit-level=high`
-- Check freshness: `npm outdated`
-- Verify before completion: `npm test`
+- Re-check high vulnerabilities: `pnpm audit --audit-level=high`
+- Check freshness: `pnpm outdated`
+- Verify before completion: `pnpm test`

@@ -45,10 +45,10 @@ The sprint report is calculated based on the issue changelogs for all issues pre
 
 ## Running the unit tests
 
-The unit tests are set up with Jest. Use the npm test script to run them.
+The unit tests are set up with Jest. Use the pnpm test script to run them.
 
 ```shell
-npm test
+pnpm test
 ```
 
 You can also use the [Jest VS Code extension](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest), which provides a visual interface for running your Jest tests in VS Code.

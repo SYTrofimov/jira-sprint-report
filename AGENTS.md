@@ -9,7 +9,7 @@ Library for calculating GreenHopper-like sprint reports based on the public Jira
 ## Architecture & Tech Stack
 
 - Node.js library in the repository root
-- Package manager: npm with `package-lock.json`
+- Package manager: pnpm with `pnpm-lock.yaml`
 - Test runner: Jest
 - Tooling includes ESLint and Prettier
 

@@ -1,2 +1,6 @@
 packages: []
 minimumReleaseAge: 10080
+# Allow urgent security patches before the 7-day cooldown (e.g. axios GHSA-3p68-rc4w-qgx5).
+minimumReleaseAgeExclude:
+  - axios
+  - follow-redirects

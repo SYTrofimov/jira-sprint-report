@@ -1,16 +1,11 @@
 {
   "name": "jira-sprint-report",
   "version": "0.1.0",
-  "packageManager": "pnpm@10.33.4",
+  "packageManager": "pnpm@11.2.2",
   "type": "module",
   "private": true,
   "scripts": {
     "test": "NODE_OPTIONS=\"--experimental-vm-modules --no-warnings\" jest --config=jest.config.cjs"
-  },
-  "pnpm": {
-    "overrides": {
-      "follow-redirects": "^1.16.0"
-    }
   },
   "devDependencies": {
     "@eslint/js": "^10.0.0",

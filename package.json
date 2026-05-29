@@ -9,7 +9,6 @@
   },
   "pnpm": {
     "overrides": {
-      "minimatch": "10.2.5",
       "follow-redirects": "^1.16.0"
     }
   },

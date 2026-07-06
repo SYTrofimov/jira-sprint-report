@@ -11,6 +11,6 @@ minimumReleaseAgeExclude:
   - js-yaml
 overrides:
   '@babel/core': 8.0.1
-  js-yaml: 4.2.0
+  js-yaml: 4.3.0
   form-data: 4.0.6
   follow-redirects: ^1.16.0

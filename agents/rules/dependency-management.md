@@ -49,10 +49,27 @@
 - Prefer patch and minor upgrades before majors; do not batch unrelated major upgrades into one
   change.
 
+### Security overrides
+
+- Remediate a transitive advisory with a **range-scoped** pnpm override, one entry per affected
+  major line — for example `"js-yaml@>=5.0.0 <=5.2.0": "^5.2.1"` alongside an existing
+  `"js-yaml@>=4.0.0 <=4.1.1": "^4.2.0"`.
+- Never use an unconditional pin (`"js-yaml": "5.2.1"`) and never bump an existing pin across a
+  major. Both force one version on every consumer and break the other major lines.
+- Expect several scoped entries per package: advisories increasingly land on multiple majors at
+  once. `brace-expansion` needed `<1.1.16 -> ^1.1.16`, `>=2.0.0 <2.1.2 -> ^2.1.2` and
+  `>=3.0.0 <5.0.7 -> ^5.0.7` simultaneously.
+- The release-age cooldown blocks fresh security patches. When the patched version is younger than
+  the cooldown, add the package to `minimumReleaseAgeExclude` with a comment naming the advisory.
+- Check publish age with `npm view <pkg> time --json` before assuming an override will resolve.
+
 ### Completion
 
 - After each dependency change, run the smallest relevant checks first, then this repo's full
   verification before marking the work complete or committing.
+- Install frozen when validating a dependency change: `pnpm install --frozen-lockfile`. A bare
+  `pnpm install` after editing overrides _rewrites_ the lockfile to match, so it can never detect
+  `package.json` <-> lockfile drift — the command mutates the thing under test.
 - If verification fails, fix compatibility issues caused by the update or stop and report the
   blocker; do not ship a broken upgrade.
 - Do not assume a merged Renovate PR clears the alert; re-check GitHub alerts and local audit
@@ -63,6 +80,7 @@
 
 ## This repo
 
+- Overrides and the cooldown settings live in `pnpm-workspace.yaml`.
 - Root-only pnpm package; there is no `ui/` workspace and no smoke-first policy.
 - `pnpm-workspace.yaml` enforces the 7-day cooldown for direct installs and updates; keep it unless
   the operator explicitly approves a change.

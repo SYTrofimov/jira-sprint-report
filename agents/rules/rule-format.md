@@ -3,14 +3,28 @@
 ## Scope
 
 - Writing or editing a rule in `agents/rules/`
-- Deciding whether something belongs in a rule at all
+- Deciding whether something belongs in a rule at all, and in which tier
+
+## Always-on versus on-demand
+
+There are two tiers, and putting a rule in the wrong one makes it silently ineffective.
+
+- **Always-on → inline it in `AGENTS.md`.** Use this when the rule has no trigger: it constrains
+  every turn, or its trigger is something the agent does on its own rather than something the user
+  asks for. A rule that must fire without a matching request cannot live in `agents/rules/`.
+- **On-demand → a file in `agents/rules/`.** Use this when a `Scope` can name the situation that
+  brings the rule into play — editing a doc, cutting a commit, deploying, updating a dependency.
+  The agent matches `Scope` against the task and reads the file then.
+- The test: **can you write a `Scope` that a user request would match?** If not, it is always-on.
+- Keep the always-on section short. Everything inlined there is paid for on every turn, and a long
+  list dilutes the rules that matter.
+- `AGENTS.md` is the runtime entry point; it carries the always-on rules and points to the rest.
+- `CLAUDE.md` only redirects to `AGENTS.md` and holds Claude Code harness specifics.
 
 ## What belongs in a rule
 
 - Rules describe how an agent works **in this repo**: paths, commands, gates, thresholds, holds,
   and repo-specific gotchas.
-- `AGENTS.md` is the runtime entry point; it introduces the repo and points to the applicable rules.
-- `CLAUDE.md` only redirects to `AGENTS.md` and holds Claude Code harness specifics.
 
 ## What does not belong in a rule
 

@@ -16,6 +16,6 @@ overrides:
   follow-redirects: ^1.16.0
   # GHSA (brace-expansion DoS): scoped per major so each consumer keeps
   # its own major line.
-  'brace-expansion@>=3.0.0 <5.0.7': ^5.0.7
-  'brace-expansion@<1.1.16': ^5.0.0
-  'brace-expansion@>=2.0.0 <2.1.2': ^5.0.0
+  'brace-expansion@>=3.0.0 <5.0.9': ^5.0.9
+  'brace-expansion@<1.1.18': ^1.1.18
+  'brace-expansion@>=2.0.0 <2.1.2': ^2.1.2

@@ -12,6 +12,16 @@
 - `superpowers:verification-before-completion` — running verification before claiming a commit is
   ready.
 
+## GitHub CLI and network access
+
+- Use `gh` for GitHub authentication and operations. Do not use a browser as a
+  fallback.
+- Run `gh` only with verified GitHub network access.
+- If a restricted or sandboxed environment reports an invalid or expired token,
+  rerun a read-only check such as `gh api user --jq .login` with approved network
+  access before diagnosing an authentication issue or changing credentials.
+- Keep GitHub tokens out of command output and logs.
+
 ## Commit messages
 
 - Use Conventional Commits: `<type>(<scope>): <subject>`.

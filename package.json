@@ -1,7 +1,7 @@
 {
   "name": "jira-sprint-report",
   "version": "0.1.0",
-  "packageManager": "pnpm@11.26.0",
+  "packageManager": "pnpm@12.3.4",
   "type": "module",
   "private": true,
   "scripts": {

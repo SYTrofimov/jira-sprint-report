@@ -11,7 +11,7 @@ minimumReleaseAgeExclude:
   - js-yaml
 overrides:
   # GHSA-p498-v437-472g: prevent recursive copies from following symlinked files.
-  '@humanfs/node@<0.16.8': 0.16.8
+  '@humanfs/node@<0.16.8': 0.17.0
   # GHSA-73wf-gq98-2v4g: reject vulnerable Browserslist releases while
   # preserving the consumer's compatible 4.x line.
   'browserslist@<=4.28.6': ^4.28.7

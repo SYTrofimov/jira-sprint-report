@@ -4,6 +4,8 @@ allowBuilds:
 minimumReleaseAge: 10080
 # Allow urgent security patches before the 7-day cooldown (e.g. axios GHSA-3p68-rc4w-qgx5).
 minimumReleaseAgeExclude:
+  # GHSA-q2hr-2g5m-vwhr / GHSA-qhr7-859c-m2p7 / GHSA-6j4f-fj2g-mc7p.
+  - brace-expansion@1.1.21 || 2.1.7 || 5.0.12
   - axios
   - follow-redirects
   - form-data
@@ -21,6 +23,6 @@ overrides:
   follow-redirects: ^1.16.0
   # GHSA (brace-expansion DoS): scoped per major so each consumer keeps
   # its own major line.
-  'brace-expansion@>=3.0.0 <5.0.9': ^5.0.9
-  'brace-expansion@<1.1.18': ^1.1.18
-  'brace-expansion@>=2.0.0 <2.1.2': ^2.1.2
+  'brace-expansion@>=3.0.0 <5.0.12': ^5.0.12
+  'brace-expansion@<1.1.21': ^1.1.21
+  'brace-expansion@>=2.0.0 <2.1.7': ^2.1.7

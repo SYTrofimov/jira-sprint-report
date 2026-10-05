@@ -24,5 +24,5 @@ overrides:
   # GHSA (brace-expansion DoS): scoped per major so each consumer keeps
   # its own major line.
   'brace-expansion@>=3.0.0 <5.0.12': ^5.0.12
-  'brace-expansion@<1.1.21': ^1.1.21
+  'brace-expansion@<1.1.21': ^5.0.0
   'brace-expansion@>=2.0.0 <2.1.7': ^2.1.7

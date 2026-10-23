@@ -20,7 +20,8 @@ overrides:
   '@babel/core': 8.0.6
   js-yaml: 4.3.2
   form-data: 4.0.6
-  follow-redirects: ^1.16.0
+  # GHSA-q3jh-wrc6-jgq8 and GHSA-8r9p-f939-6h3c.
+  'follow-redirects@>=1.16.0 <1.16.1': 1.16.1
   # GHSA (brace-expansion DoS): scoped per major so each consumer keeps
   # its own major line.
   'brace-expansion@>=3.0.0 <5.0.12': ^5.0.12

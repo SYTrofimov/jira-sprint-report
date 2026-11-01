@@ -17,7 +17,7 @@ overrides:
   # GHSA-73wf-gq98-2v4g: reject vulnerable Browserslist releases while
   # preserving the consumer's compatible 4.x line.
   'browserslist@<=4.28.6': ^4.28.7
-  '@babel/core': 8.0.6
+  '@babel/core': 8.0.9
   js-yaml: 4.3.2
   form-data: 4.0.6
   # GHSA-q3jh-wrc6-jgq8 and GHSA-8r9p-f939-6h3c.
